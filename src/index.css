@@ -46,19 +46,20 @@ h1 { margin: 0; font-size: clamp(3rem, 7.5vw, 6.4rem); line-height: .86; letter-
 h1 em { color: var(--orange); font-style: normal; text-shadow: 3px 3px 0 var(--paper); }
 .lede { max-width: 580px; margin: 25px auto 0; font-size: clamp(1rem, 2vw, 1.18rem); line-height: 1.55; }
 .challenge-card { position: relative; max-width: 850px; margin: 0 auto; display: grid; grid-template-columns: 180px 1fr; background: var(--paper); border: var(--border); box-shadow: 10px 10px 0 var(--navy); transform: rotate(-.35deg); }
-.film-poster { min-height: 390px; padding: 20px 16px 16px; display: flex; flex-direction: column; align-items: center; overflow: hidden; border-right: var(--border); color: var(--paper); background: var(--orange); position: relative; text-align: center; isolation: isolate; }
-.film-poster::before { content: ''; position: absolute; inset: 0; z-index: -2; opacity: .2; background: repeating-linear-gradient(135deg, transparent 0 12px, var(--navy) 12px 14px); }
-.film-poster::after { content: ''; position: absolute; width: 185px; height: 185px; top: 64px; z-index: -1; border: 2px solid var(--paper); border-radius: 50%; opacity: .35; }
+.film-poster { min-height: 390px; padding: 0 16px 17px; display: flex; flex-direction: column; align-items: center; overflow: hidden; border-right: var(--border); color: var(--navy); background: var(--yellow); position: relative; text-align: center; isolation: isolate; }
+.film-poster::before { content: ''; position: absolute; inset: 75px 12px 126px; z-index: -2; border: 2px solid var(--navy); background: var(--orange); transform: rotate(1.5deg); }
+.film-poster::after { content: ''; position: absolute; width: 135px; height: 135px; top: 92px; z-index: -1; border: 2px solid var(--paper); border-radius: 50%; opacity: .45; }
+.poster-clapper { width: calc(100% + 32px); height: 49px; margin-bottom: 14px; border-bottom: 12px solid var(--navy); background: repeating-linear-gradient(125deg, var(--navy) 0 24px, var(--paper) 25px 43px); box-shadow: 0 2px 0 var(--paper), 0 4px 0 var(--navy); transform: rotate(-3deg) translateY(-5px) scale(1.04); transform-origin: left bottom; }
 .poster-presents { margin: 0; text-transform: uppercase; font-size: .55rem; font-weight: 800; letter-spacing: .15em; }
-.poster-art { height: 170px; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: 4px; position: relative; }
+.poster-art { height: 158px; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: 4px; position: relative; }
 .poster-art i { width: 58px; height: 93px; display: block; border: 2px solid var(--paper); border-bottom: 0; border-radius: 50% 50% 0 0; background: var(--navy); position: relative; transform: rotate(-5deg); }
 .poster-art i::before { content: ''; position: absolute; width: 7px; height: 7px; left: 15px; top: 25px; border-radius: 50%; background: var(--paper); box-shadow: 19px 0 0 var(--paper); }
 .poster-art i:nth-child(2) { height: 76px; opacity: .55; transform: rotate(7deg); }
-.poster-art span { position: absolute; right: 14px; top: 18px; width: 39px; height: 39px; display: grid; place-items: center; border: 2px solid var(--navy); border-radius: 50%; color: var(--navy); background: var(--yellow); font: 800 1.6rem 'League Spartan'; transform: rotate(8deg); }
-.poster-billing { width: 100%; padding-top: 13px; border-top: 1px solid rgba(255,249,233,.65); }
-.poster-billing small { margin: 0 0 3px; opacity: .85; text-transform: uppercase; font-size: .55rem; font-weight: 800; letter-spacing: .12em; }
+.poster-art span { position: absolute; right: 9px; top: 17px; width: 39px; height: 39px; display: grid; place-items: center; border: 2px solid var(--paper); border-radius: 50%; color: var(--paper); background: var(--orange); font: 800 1.6rem 'League Spartan'; transform: rotate(8deg); }
+.poster-billing { width: calc(100% + 10px); padding-top: 13px; border-top: 3px solid var(--navy); }
+.poster-billing small { margin: 0 0 3px; opacity: .78; text-transform: uppercase; font-size: .55rem; font-weight: 800; letter-spacing: .12em; }
 .poster-billing strong { display: block; font: 800 1.42rem/.95 'League Spartan'; text-transform: uppercase; text-wrap: balance; }
-.poster-billing b { display: block; margin-top: 11px; color: var(--yellow); font: 800 1.55rem/1 'League Spartan'; text-transform: uppercase; letter-spacing: .04em; }
+.poster-billing b { display: block; margin-top: 11px; color: var(--orange); font: 800 1.55rem/1 'League Spartan'; text-transform: uppercase; letter-spacing: .04em; }
 .challenge-copy { padding: 32px clamp(25px, 4vw, 46px); }
 .challenge-copy h2, .notice-card h2 { margin: 0 0 10px; font-size: clamp(1.55rem, 3vw, 2.2rem); text-transform: uppercase; letter-spacing: -.03em; }
 .challenge-copy > p:not(.card-kicker) { margin: 0 0 25px; line-height: 1.5; }
@@ -173,6 +174,7 @@ small { display: block; margin-top: 8px; opacity: .67; }
   .game-page { padding-inline: 18px; }
   .challenge-card { grid-template-columns: 1fr; transform: none; box-shadow: 6px 6px 0 var(--navy); }
   .film-poster { min-height: 285px; border-right: 0; border-bottom: var(--border); }
+  .poster-clapper { height: 42px; margin-bottom: 7px; }
   .poster-art { height: 105px; }
   .poster-art i { height: 72px; }
   .poster-art i:nth-child(2) { height: 58px; }

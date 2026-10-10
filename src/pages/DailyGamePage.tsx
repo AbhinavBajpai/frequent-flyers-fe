@@ -72,6 +72,7 @@ function FilmPoster({ person }: { person: PersonSummary }) {
   const department = person.known_for_department?.toLowerCase()
   const billing = department === 'directing' ? 'Directed by' : department === 'writing' ? 'Written by' : 'Starring'
   return <aside className="film-poster" aria-label={`Film poster: ${billing} ${person.name}, with an unknown collaborator`}>
+    <div className="poster-clapper" aria-hidden="true" />
     <p className="poster-presents">A Cinema Connects picture</p>
     <div className="poster-art" aria-hidden="true"><i /><i /><span>?</span></div>
     <div className="poster-billing"><small>{billing}</small><strong>{person.name}</strong><b>with…</b></div>
