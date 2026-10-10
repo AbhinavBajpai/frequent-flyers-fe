@@ -30,15 +30,16 @@ export function DailyGamePage() {
 
   const challenge = daily.data.challenge
   if (resume.isError) return <Status title="We lost your flight plan" message="Your saved game couldn’t be restored. Please try again before making another choice." retry={() => resume.refetch()} />
-  const state = play?.state ?? 'COLLABORATOR_PENDING'
-  const complete = state === 'COMPLETED' || state === 'COMPLETED_INCORRECT_COLLABORATOR'
-  const stage: 0 | 1 | 2 = complete ? 2 : state === 'PROJECT_GUESSING' ? 1 : 0
+  const state = play?.state ?? 'choosing_collaborator'
+  const complete = state === 'finished'
+  const incorrectCollaborator = complete && play?.shared_project_count === 0
+  const stage: 0 | 1 | 2 = complete ? 2 : state === 'guessing_projects' ? 1 : 0
   return <section className="game-page">
     <div className="sun-disc" aria-hidden="true" /><div className="cloud cloud-one" aria-hidden="true" /><div className="cloud cloud-two" aria-hidden="true" />
     <div className="game-intro"><p className="eyebrow">Today’s challenge · {challenge.challenge_date}</p><h1>Who flies well<br />with <em>{challenge.featured_person.name}?</em></h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
     <div className="challenge-card"><Portrait person={challenge.featured_person} /><div className="challenge-copy">
-      {resume.isPending ? <p role="status">Restoring your flight…</p> : complete ? <Result playData={playData!} incorrectCollaborator={state === 'COMPLETED_INCORRECT_COLLABORATOR'} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Frequent Flyers ${challenge.challenge_date} ✈️ ${play?.score ?? 0}`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
-        : state === 'PROJECT_GUESSING' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? finish.error} />
+      {resume.isPending ? <p role="status">Restoring your flight…</p> : complete ? <Result playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Frequent Flyers ${challenge.challenge_date} ✈️ ${play?.score ?? 0}`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
+        : state === 'guessing_projects' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? finish.error} />
           : <CollaboratorRound featured={challenge.featured_person} person={person} setPerson={setPerson} submitting={collaborator.isPending} submit={() => person && collaborator.mutate(person)} error={collaborator.error} />}
     </div></div><FlightPath stage={stage} />
   </section>

@@ -1,5 +1,5 @@
-export type PlayState = 'COLLABORATOR_PENDING' | 'PROJECT_GUESSING' | 'COMPLETED' | 'COMPLETED_INCORRECT_COLLABORATOR'
-export interface PersonSummary { id?: string; source: 'tmdb'; tmdb_id: number; name: string; profile_url: string | null; known_for?: string[] }
+export type PlayState = 'choosing_collaborator' | 'guessing_projects' | 'finished'
+export interface PersonSummary { id?: string; source?: 'tmdb'; tmdb_id: number; name: string; profile_url: string | null; known_for?: string[]; known_for_department?: string | null }
 export interface ProjectSummary { source: 'tmdb'; tmdb_id: number; media_type: 'movie' | 'tv'; title: string; year: number | null; poster_url?: string | null }
 export interface Challenge { id: string; challenge_date: string; featured_person: PersonSummary; rules_version: number; available_from: string; available_until: string }
 export interface PlaySummary { id: string; state: PlayState; score: number; correct_guesses?: number; shared_project_count?: number }
@@ -12,3 +12,21 @@ export interface ProjectGuessResponse { guess: ProjectGuess; play: PlaySummary }
 export interface SearchPeopleResponse { people: PersonSummary[] }
 export interface SearchProjectsResponse { projects: ProjectSummary[] }
 export interface ApiErrorPayload { detail?: string; message?: string; error?: { code?: string; message?: string; details?: Record<string, unknown> } }
+
+export interface AdminPersonResult extends Omit<PersonSummary, 'known_for'> {
+  id?: string
+  profile_path?: string | null
+  known_for_department?: string | null
+  known_for?: Array<{ title?: string; name?: string } | string>
+}
+export interface AdminPeopleSearchResponse { results: AdminPersonResult[]; source: 'cache' | 'tmdb' }
+export interface AdminImportResponse { person: AdminPersonResult; qualified_projects: number }
+export interface AdminCollaborator extends PersonSummary { id: string; shared_project_count: number }
+export interface AdminCollaboratorsResponse { person: AdminPersonResult; collaborators: AdminCollaborator[] }
+export type AdminChallengeStatus = 'draft' | 'scheduled' | 'published' | 'cancelled'
+export interface AdminChallenge { id: string; status: AdminChallengeStatus; scheduled_date: string | null; featured_person: AdminPersonResult; rules_version: number }
+export interface AdminChallengeResponse { challenge: AdminChallenge }
+export interface AdminPreview { collaborator_count: number; project_pairs: number; counts: Record<string, number> }
+export interface AdminPublishResponse extends AdminChallengeResponse { snapshot_projects: number }
+export interface AdminCalendarDay { date: string; challenge: AdminChallenge | null }
+export interface AdminCalendarResponse { days: AdminCalendarDay[] }

@@ -6,7 +6,7 @@ import { afterEach, vi } from 'vitest'
 import { App } from './App'
 
 const featured = { id: 'person-1', source: 'tmdb', tmdb_id: 880, name: 'Ben Affleck', profile_url: null }
-const daily = { challenge: { id: 'challenge-1', challenge_date: '2026-10-10', featured_person: featured, rules_version: 1, available_from: '2026-10-10T00:00:00Z', available_until: '2026-10-11T00:00:00Z' }, play: { id: 'play-1', state: 'COLLABORATOR_PENDING', score: 0 }, server_time: '2026-10-10T12:00:00Z' }
+const daily = { challenge: { id: 'challenge-1', challenge_date: '2026-10-10', featured_person: featured, rules_version: 1, available_from: '2026-10-10T00:00:00Z', available_until: '2026-10-11T00:00:00Z' }, play: { id: 'play-1', state: 'choosing_collaborator', score: 0 }, server_time: '2026-10-10T12:00:00Z' }
 const response = (body: unknown, status = 200) => Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }))
 
 function renderApp(route = '/') {
@@ -41,10 +41,10 @@ describe('application routes', () => {
       if (url.includes('/challenges/daily')) return response(daily)
       if (url.endsWith('/plays/play-1') && !init?.method) return response({ play: daily.play })
       if (url.includes('/people/search')) return response({ people: [{ source: 'tmdb', tmdb_id: 1892, name: 'Matt Damon', profile_url: null, known_for: ['Good Will Hunting'] }] })
-      if (url.endsWith('/collaborator')) return response({ play: { id: 'play-1', state: 'PROJECT_GUESSING', score: 2, shared_project_count: 2 }, collaborator: { source: 'tmdb', tmdb_id: 1892, name: 'Matt Damon', profile_url: null }, shared_project_count: 2, guesses: [] })
+      if (url.endsWith('/collaborator')) return response({ play: { id: 'play-1', state: 'guessing_projects', score: 2, shared_project_count: 2 }, collaborator: { source: 'tmdb', tmdb_id: 1892, name: 'Matt Damon', profile_url: null }, shared_project_count: 2, guesses: [] })
       if (url.includes('/projects/search')) return response({ projects: [{ source: 'tmdb', tmdb_id: 489, media_type: 'movie', title: 'Good Will Hunting', year: 1997 }] })
-      if (url.endsWith('/project-guesses')) return response({ guess: { id: 'guess-1', correct: true, project: { source: 'tmdb', tmdb_id: 489, media_type: 'movie', title: 'Good Will Hunting', year: 1997 } }, play: { id: 'play-1', state: 'PROJECT_GUESSING', score: 3, shared_project_count: 2, correct_guesses: 1 } })
-      if (url.endsWith('/finish')) return response({ play: { id: 'play-1', state: 'COMPLETED', score: 3, shared_project_count: 2, correct_guesses: 1 }, collaborator: { source: 'tmdb', tmdb_id: 1892, name: 'Matt Damon', profile_url: null }, guesses: [{ id: 'guess-1', correct: true, project: { source: 'tmdb', tmdb_id: 489, media_type: 'movie', title: 'Good Will Hunting', year: 1997 } }], result: { challenge_date: '2026-10-10', score: 3, shared_project_count: 2, correct_guesses: 1, incorrect_guesses: 0, share_text: 'Frequent Flyers ✈️ 3' }, missed_shared_projects: [] })
+      if (url.endsWith('/project-guesses')) return response({ guess: { id: 'guess-1', correct: true, project: { source: 'tmdb', tmdb_id: 489, media_type: 'movie', title: 'Good Will Hunting', year: 1997 } }, play: { id: 'play-1', state: 'guessing_projects', score: 3, shared_project_count: 2, correct_guesses: 1 } })
+      if (url.endsWith('/finish')) return response({ play: { id: 'play-1', state: 'finished', score: 3, shared_project_count: 2, correct_guesses: 1 }, collaborator: { source: 'tmdb', tmdb_id: 1892, name: 'Matt Damon', profile_url: null }, guesses: [{ id: 'guess-1', correct: true, project: { source: 'tmdb', tmdb_id: 489, media_type: 'movie', title: 'Good Will Hunting', year: 1997 } }], result: { challenge_date: '2026-10-10', score: 3, shared_project_count: 2, correct_guesses: 1, incorrect_guesses: 0, share_text: 'Frequent Flyers ✈️ 3' }, missed_shared_projects: [] })
       return response({}, 404)
     })
     const user = userEvent.setup()

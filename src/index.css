@@ -106,6 +106,54 @@ small { display: block; margin-top: 8px; opacity: .67; }
 .notice-card { max-width: 800px; display: flex; align-items: center; gap: 25px; padding: 28px; border: var(--border); background: var(--yellow); box-shadow: 8px 8px 0 var(--navy); }
 .notice-card p { margin: 0; }
 .notice-icon { font-size: 3rem; }
+.admin-page { padding: clamp(42px, 6vw, 82px) clamp(20px, 5vw, 76px); background: var(--cream); }
+.admin-page h1 { font-size: clamp(2.8rem, 6vw, 5.2rem); }
+.admin-page h2 { margin: 0 0 22px; font-size: 1.45rem; text-transform: uppercase; letter-spacing: -.025em; }
+.admin-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 30px; }
+.admin-heading .lede { margin-bottom: 34px; }
+.admin-heading > button { flex: 0 0 auto; margin-top: 8px; }
+.admin-key-card { max-width: 650px; padding: 26px; border: var(--border); background: var(--yellow); box-shadow: 8px 8px 0 var(--navy); }
+.admin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.admin-panel { min-width: 0; padding: 24px; border: var(--border); background: var(--paper); box-shadow: 5px 5px 0 var(--navy); }
+.step-label, .source-note { margin: 0 0 6px; color: var(--orange); font-size: .7rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.source-note { margin-top: 16px; }
+.admin-status, .admin-empty { padding: 14px; border: 1px dashed rgba(21,49,71,.55); background: #fff; font-size: .87rem; }
+.admin-alert { max-width: 850px; margin: 0 0 20px; padding: 13px 16px; border: 2px solid var(--navy); font-weight: 700; }
+.admin-alert.success { background: #b7d8b1; }
+.admin-alert.error { color: #711d13; background: #f5b8a4; }
+.admin-panel .admin-alert { margin-top: 15px; font-size: .85rem; }
+.people-results, .collaborator-list { margin: 14px 0 0; padding: 0; list-style: none; }
+.people-results li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid rgba(21,49,71,.25); }
+.people-results img, .avatar-placeholder { width: 48px; height: 56px; object-fit: cover; border: 1px solid var(--navy); background: var(--orange); }
+.avatar-placeholder { display: grid; place-items: center; color: var(--paper); font: 800 1.4rem 'League Spartan'; }
+.people-results button { min-width: 80px; height: 38px; margin: 0; padding: 0 10px; }
+.people-results small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.selected-person { display: flex; flex-direction: column; padding: 16px; border-left: 6px solid var(--orange); background: var(--yellow); }
+.selected-person span { margin-top: 3px; font-size: .8rem; }
+.collaborator-list { counter-reset: collaborators; }
+.collaborator-list li { display: flex; justify-content: space-between; gap: 10px; padding: 10px 4px; border-bottom: 1px solid rgba(21,49,71,.25); font-size: .88rem; }
+.collaborator-list strong { color: var(--orange); white-space: nowrap; }
+.panel-action { width: 100%; min-height: 50px; margin: 0; }
+.challenge-state { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 13px; background: var(--yellow); text-transform: uppercase; font-size: .76rem; letter-spacing: .1em; }
+.admin-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.admin-action-row button { min-height: 46px; margin: 0; }
+.secondary-button { min-height: 44px; margin: 0; color: var(--ink); background: var(--paper); }
+.preview-card { display: flex; flex-direction: column; margin-top: 16px; padding: 14px; border: 2px solid #38866c; background: #d7ead1; }
+.preview-card span { margin-top: 4px; font-size: .82rem; }
+.calendar-panel { margin-top: 24px; }
+.calendar-heading { display: flex; justify-content: space-between; gap: 30px; align-items: flex-start; }
+.date-range { display: flex; gap: 10px; }
+.date-range label { margin: 0; }
+.date-range input { width: 155px; height: 42px; margin-top: 5px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+.calendar-day { min-height: 125px; display: flex; flex-direction: column; padding: 13px; border: 2px solid var(--navy); background: #fff; }
+.calendar-day time { margin-bottom: 20px; font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.calendar-day strong { line-height: 1.15; }
+.calendar-day span { margin-top: auto; padding-top: 10px; color: var(--orange); font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.calendar-day.gap { border-style: dashed; background: rgba(255,249,233,.45); }
+.calendar-day.gap strong { opacity: .65; }
+.calendar-day.published { background: #d7ead1; }
+.calendar-day.scheduled { background: var(--yellow); }
 .site-footer { min-height: 56px; padding: 14px clamp(22px, 5vw, 76px); display: flex; align-items: center; justify-content: space-between; gap: 20px; color: var(--paper); background: var(--navy); font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; }
 
 @media (max-width: 680px) {
@@ -123,6 +171,15 @@ small { display: block; margin-top: 8px; opacity: .67; }
   .cloud-two { display: none; }
   .site-footer { justify-content: center; text-align: center; }
   .site-footer span:last-child { display: none; }
+  .admin-heading, .calendar-heading { display: block; }
+  .admin-heading > button { margin-bottom: 25px; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .date-range { margin-bottom: 18px; }
+  .date-range input { width: 100%; }
+  .date-range label { flex: 1; }
+  .admin-action-row { grid-template-columns: 1fr; }
 }
+
+@media (min-width: 681px) and (max-width: 1050px) { .admin-grid { grid-template-columns: 1fr 1fr; } .admin-workflow { grid-column: 1 / -1; } }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
