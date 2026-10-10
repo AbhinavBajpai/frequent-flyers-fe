@@ -1,13 +1,13 @@
 const checkpoints = ['Take-off', 'Connection', 'Final call']
 
-export function FlightPath() {
+export function FlightPath({ stage = 0 }: { stage?: 0 | 1 | 2 }) {
   return (
-    <div className="flight-path" aria-label="Challenge progress: ready for take-off">
+    <div className={`flight-path stage-${stage}`} aria-label={`Challenge progress: ${checkpoints[stage]}`}>
       <span className="flight-line" aria-hidden="true" />
       <span className="plane" aria-hidden="true">➤</span>
       <ol>
         {checkpoints.map((label, index) => (
-          <li className={index === 0 ? 'active' : ''} key={label}>
+          <li className={index <= stage ? 'active' : ''} key={label}>
             <span aria-hidden="true" />
             {label}
           </li>
