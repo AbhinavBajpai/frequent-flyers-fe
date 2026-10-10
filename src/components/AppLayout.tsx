@@ -4,9 +4,9 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <NavLink className="wordmark" to="/" aria-label="Frequent Flyers home">
+        <NavLink className="wordmark" to="/" aria-label="Cinema Connects home">
           <span className="wordmark-mark" aria-hidden="true">✦</span>
-          <span>Frequent Flyers</span>
+          <span>Cinema Connects</span>
         </NavLink>
         <nav aria-label="Main navigation">
           <NavLink to="/" end>Today</NavLink>

@@ -81,7 +81,8 @@ button:not(:disabled) { cursor: pointer; }
 .attempts li { display: flex; align-items: center; gap: 12px; padding: 9px 12px; background: #fff; border-bottom: 1px solid rgba(21,49,71,.22); }
 .attempts li:last-child { border-bottom: 0; }
 .attempts li > span { display: grid; place-items: center; width: 27px; height: 27px; flex: 0 0 auto; border: 2px solid var(--navy); color: var(--paper); background: var(--orange); font-weight: 800; }
-.attempts li.correct > span { background: #38866c; }
+.attempts li.outcome-both > span { background: #38866c; }
+.attempts li.submitted { padding-left: 16px; }
 .attempts small { margin: 1px 0 0; font-size: .72rem; }
 .score-stamp { width: 115px; height: 115px; display: grid; place-content: center; margin: 15px 0; border: 3px solid var(--navy); border-radius: 50%; background: var(--yellow); text-align: center; transform: rotate(-5deg); }
 .score-stamp strong { font: 800 3.2rem/.8 'League Spartan'; }

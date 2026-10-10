@@ -1,6 +1,6 @@
-# Frequent Flyers frontend
+# Cinema Connects frontend
 
-React and TypeScript frontend for the Frequent Flyers daily film-collaboration game.
+React and TypeScript frontend for the Cinema Connects daily film-collaboration game.
 
 ## Local development
 
