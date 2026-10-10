@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ApiError, gameApi } from '../api/client'
 import type { CollaboratorResponse, PersonSummary, PlayResponse, ProjectGuess, ProjectSummary } from '../api/types'
 import { FlightPath } from '../components/FlightPath'
@@ -24,11 +24,7 @@ export function DailyGamePage() {
   const [person, setPerson] = useState<PersonSummary | null>(null)
   const [project, setProject] = useState<ProjectSummary | null>(null)
   const [copied, setCopied] = useState(false)
-  const [headlineIndex, setHeadlineIndex] = useState(0)
-  useEffect(() => {
-    const timer = window.setInterval(() => setHeadlineIndex((current) => (current + 1) % headlineVariants.length), 4_500)
-    return () => window.clearInterval(timer)
-  }, [])
+  const [headlineIndex] = useState(() => Math.floor(Math.random() * headlineVariants.length))
   const daily = useQuery({ queryKey: ['daily-challenge'], queryFn: gameApi.getDaily, retry: false })
   const playId = daily.data?.play.id
   const resume = useQuery({
