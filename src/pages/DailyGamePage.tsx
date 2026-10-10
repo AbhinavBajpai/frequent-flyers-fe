@@ -98,7 +98,7 @@ function ProjectRound({ playData, project, setProject, submitting, finishing, re
 
 function GuessHistory({ guesses }: { guesses: ProjectGuess[] }) {
   return <div className="attempts" aria-live="polite"><h3>Collabs</h3>{!guesses.length ? <p className="empty-attempts">Your project attempts will appear here.</p> : <ol>{guesses.map((entry) => {
-    const result = entry.outcome === 'both' ? { symbol: '🎬', label: 'Both people are credited' } : entry.outcome === 'one' ? { symbol: '🎟', label: 'Only one person is credited' } : entry.outcome === 'neither' ? { symbol: '🎞', label: 'Neither person is credited' } : null
+    const result = entry.outcome === 'both' ? { symbol: '✓', label: 'Both people are credited' } : entry.outcome === 'one' ? { symbol: '×', label: 'Only one person is credited' } : entry.outcome === 'neither' ? { symbol: '×', label: 'Neither person is credited' } : null
     return <li className={result ? `outcome-${entry.outcome}` : 'submitted'} key={entry.id}>{result && <span aria-hidden="true">{result.symbol}</span>}<div><strong>{entry.project.title}</strong><small>{entry.project.year ?? 'Year unknown'}{result ? ` · ${result.label}` : ''}</small></div></li>
   })}</ol>}</div>
 }
