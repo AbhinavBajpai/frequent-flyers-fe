@@ -89,7 +89,7 @@ function ProjectRound({ playData, project, setProject, submitting, finishing, re
   const resolution = playData.play.resolution_status
   const pending = resolution === 'pending'
   const failed = resolution === 'failed'
-  return <><p className="card-kicker">{resolution === 'resolved' || resolution === undefined ? 'Connection ready' : 'Connection selected'}</p><h2>{playData.collaborator?.name ?? 'Your collaborator'} is on board</h2><p>Recall as many shared projects as you can. Your answers will be revealed when you finish.</p>
+  return <><h2>You picked {playData.collaborator?.name ?? 'your collaborator'}</h2><p>Recall as many shared projects as you can. Your answers will be revealed when you finish.</p>
     {resolution === 'pending' && <p className="selection-confirmation" role="status">Checking their shared projects — keep guessing.</p>}
     {failed && <div><p className="inline-error" role="alert">We couldn’t check this collaboration. Your answers are saved.</p><button className="finish-action" type="button" disabled={retrying} onClick={retry}>{retrying ? 'Trying again…' : 'Try again'}</button></div>}
     <SearchPicker label="Shared film or television project" placeholder="Search for a title…" queryKey="projects" selected={project} onSelect={setProject} disabled={submitting || finishing} search={async (query) => (await gameApi.searchProjects(query)).projects} describe={(item) => ({ key: `${item.media_type}-${item.tmdb_id}`, title: item.title, detail: [item.year, item.media_type === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' · ') })} />

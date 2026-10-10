@@ -54,7 +54,7 @@ describe('application routes', () => {
     await user.type(people, 'Matt')
     await user.click(await screen.findByRole('option', { name: /Matt Damon/i }, { timeout: 1500 }))
     await user.click(screen.getByRole('button', { name: /lock in collaborator/i }))
-    expect(await screen.findByRole('heading', { name: /Matt Damon is on board/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /You picked Matt Damon/i })).toBeInTheDocument()
     const projects = screen.getByRole('combobox', { name: /shared film/i })
     await user.type(projects, 'Good Will')
     await user.click(await screen.findByRole('option', { name: /Good Will Hunting/i }, { timeout: 1500 }))
