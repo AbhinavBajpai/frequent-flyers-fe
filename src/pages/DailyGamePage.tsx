@@ -58,7 +58,7 @@ export function DailyGamePage() {
   const incorrectCollaborator = complete && play?.shared_project_count === 0
   const stage: 0 | 1 | 2 = complete ? 2 : state === 'guessing_projects' ? 1 : 0
   return <section className="game-page">
-    <div className="sun-disc" aria-hidden="true" /><div className="cloud cloud-one" aria-hidden="true" /><div className="cloud cloud-two" aria-hidden="true" />
+    <div className="cloud cloud-one" aria-hidden="true" /><div className="cloud cloud-two" aria-hidden="true" />
     <div className="game-intro"><p className="eyebrow">Today’s challenge · {challenge.challenge_date}</p><h1>{headlineVariants[headlineIndex](challenge.featured_person.name)}</h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
     <div className={`challenge-card ${state === 'guessing_projects' ? 'project-stage' : ''}`}><FilmPoster person={challenge.featured_person} /><div className="challenge-copy">
       {resume.isPending ? <p role="status">Restoring your game…</p> : complete ? <Result playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Cinema Connects #${challenge.number} 🎬\n${play?.score ?? 0}pts`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
