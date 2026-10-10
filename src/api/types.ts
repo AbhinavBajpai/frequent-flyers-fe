@@ -4,7 +4,7 @@ export type ProjectGuessStatus = 'submitted' | 'pending' | 'correct' | 'incorrec
 export type ProjectGuessOutcome = 'both' | 'one' | 'neither'
 export interface PersonSummary { id?: string; source?: 'tmdb'; tmdb_id: number; name: string; profile_url: string | null; known_for?: string[]; known_for_department?: string | null }
 export interface ProjectSummary { source: 'tmdb'; tmdb_id: number; media_type: 'movie' | 'tv'; title: string; year: number | null; poster_url?: string | null }
-export interface Challenge { id: string; challenge_date: string; featured_person: PersonSummary; rules_version: number; available_from: string; available_until: string }
+export interface Challenge { id: string; number: number; challenge_date: string; featured_person: PersonSummary; rules_version: number; available_from: string; available_until: string }
 export interface PlaySummary { id: string; state: PlayState; score?: number; correct_guesses?: number; shared_project_count?: number; resolution_status?: ResolutionStatus | null }
 export interface ProjectGuess { id: string; correct?: boolean | null; status?: ProjectGuessStatus; outcome?: ProjectGuessOutcome; symbol?: string; project: ProjectSummary }
 export interface ShareResult { challenge_date: string; score: number; shared_project_count: number; correct_guesses: number; incorrect_guesses: number; share_text: string }
