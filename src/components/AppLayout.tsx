@@ -16,7 +16,7 @@ export function AppLayout() {
       <main><Outlet /></main>
       <footer className="site-footer">
         <span>A daily game of cinematic connections.</span>
-        <span aria-hidden="true">New departure every day · UTC</span>
+        <span aria-hidden="true">A new collaboration every day</span>
       </footer>
     </div>
   )
