@@ -24,6 +24,7 @@ describe('application routes', () => {
     expect(screen.getByLabelText(/film poster: starring ben affleck, with an unknown collaborator/i)).toBeInTheDocument()
     expect(await screen.findByRole('combobox', { name: /actor, director/i })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /admin/i })).not.toBeInTheDocument()
   })
 
   it('renders the admin placeholder', () => {

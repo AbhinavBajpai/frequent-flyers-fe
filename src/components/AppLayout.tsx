@@ -10,7 +10,6 @@ export function AppLayout() {
         </NavLink>
         <nav aria-label="Main navigation">
           <NavLink to="/" end>Today</NavLink>
-          <NavLink to="/admin">Admin</NavLink>
         </nav>
       </header>
       <main><Outlet /></main>
