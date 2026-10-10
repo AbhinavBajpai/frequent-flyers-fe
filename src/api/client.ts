@@ -47,6 +47,7 @@ export const gameApi = {
   searchProjects: (query: string) => apiRequest<SearchProjectsResponse>(`/v1/projects/search?q=${encodeURIComponent(query)}&limit=8`, { credentials: 'include' }),
   submitCollaborator: (playId: string, person: PersonSummary, key: string) => apiRequest<CollaboratorResponse>(`/v1/plays/${playId}/collaborator`, json({ person: { source: person.source ?? 'tmdb', tmdb_id: person.tmdb_id }, idempotency_key: key })),
   submitProject: (playId: string, project: ProjectSummary, key: string) => apiRequest<ProjectGuessResponse>(`/v1/plays/${playId}/project-guesses`, json({ project: { source: project.source, media_type: project.media_type, tmdb_id: project.tmdb_id }, idempotency_key: key })),
+  retryResolution: (playId: string) => apiRequest<PlayResponse>(`/v1/plays/${playId}/resolution/retry`, { method: 'POST', credentials: 'include' }),
   finish: (playId: string, key: string) => apiRequest<PlayResponse>(`/v1/plays/${playId}/finish`, json({ idempotency_key: key })),
 }
 

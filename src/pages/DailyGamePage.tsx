@@ -15,11 +15,23 @@ export function DailyGamePage() {
   const [copied, setCopied] = useState(false)
   const daily = useQuery({ queryKey: ['daily-challenge'], queryFn: gameApi.getDaily, retry: false })
   const playId = daily.data?.play.id
-  const resume = useQuery({ queryKey: ['play', playId], queryFn: () => gameApi.getPlay(playId!), enabled: Boolean(playId), retry: false })
+  const resume = useQuery({
+    queryKey: ['play', playId],
+    queryFn: () => gameApi.getPlay(playId!),
+    enabled: Boolean(playId),
+    retry: false,
+    refetchInterval: (query) => {
+      const data = query.state.data
+      const resolutionPending = data?.play.resolution_status === 'pending'
+      const guessPending = data?.guesses?.some((entry) => entry.status === 'pending' || entry.correct === null)
+      return resolutionPending || guessPending ? 1_000 : false
+    },
+  })
   const playData: PlayResponse | undefined = resume.data ?? (daily.data ? { play: daily.data.play } : undefined)
   const play = playData?.play
   const collaborator = useMutation({ mutationFn: (choice: PersonSummary) => gameApi.submitCollaborator(playId!, choice, requestKey()), onSuccess: (data: CollaboratorResponse) => { cache.setQueryData(['play', playId], data); setPerson(null) } })
   const guess = useMutation({ mutationFn: (choice: ProjectSummary) => gameApi.submitProject(playId!, choice, requestKey()), onSuccess: (data) => { cache.setQueryData<PlayResponse>(['play', playId], (current) => ({ ...current, play: data.play, guesses: [...(current?.guesses ?? []), data.guess] })); setProject(null) } })
+  const retryResolution = useMutation({ mutationFn: () => gameApi.retryResolution(playId!), onSuccess: (data) => cache.setQueryData(['play', playId], data) })
   const finish = useMutation({ mutationFn: () => gameApi.finish(playId!, requestKey()), onSuccess: (data) => cache.setQueryData(['play', playId], data) })
 
   if (daily.isPending) return <Status title="Preparing today’s flight" message="Loading the passenger manifest…" />
@@ -39,7 +51,7 @@ export function DailyGamePage() {
     <div className="game-intro"><p className="eyebrow">Today’s challenge · {challenge.challenge_date}</p><h1>Who flies well<br />with <em>{challenge.featured_person.name}?</em></h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
     <div className="challenge-card"><Portrait person={challenge.featured_person} /><div className="challenge-copy">
       {resume.isPending ? <p role="status">Restoring your flight…</p> : complete ? <Result playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Frequent Flyers ${challenge.challenge_date} ✈️ ${play?.score ?? 0}`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
-        : state === 'guessing_projects' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? finish.error} />
+        : state === 'guessing_projects' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} retrying={retryResolution.isPending} retry={() => retryResolution.mutate()} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? retryResolution.error ?? finish.error} />
           : <CollaboratorRound featured={challenge.featured_person} person={person} setPerson={setPerson} submitting={collaborator.isPending} submit={() => person && collaborator.mutate(person)} error={collaborator.error} />}
     </div></div><FlightPath stage={stage} />
   </section>
@@ -53,16 +65,24 @@ function CollaboratorRound({ featured, person, setPerson, submitting, submit, er
     {person && <p className="selection-confirmation">Board with <strong>{person.name}</strong>? You only get one collaborator choice.</p>}{error && <InlineError error={error} />}<button className="primary-action" type="button" disabled={!person || submitting} onClick={submit}>{submitting ? 'Checking ticket…' : 'Lock in collaborator'}</button></>
 }
 
-function ProjectRound({ playData, project, setProject, submitting, finishing, submit, finish, error }: { playData: PlayResponse; project: ProjectSummary | null; setProject: (value: ProjectSummary | null) => void; submitting: boolean; finishing: boolean; submit: () => void; finish: () => void; error: Error | null }) {
+function ProjectRound({ playData, project, setProject, submitting, finishing, retrying, retry, submit, finish, error }: { playData: PlayResponse; project: ProjectSummary | null; setProject: (value: ProjectSummary | null) => void; submitting: boolean; finishing: boolean; retrying: boolean; retry: () => void; submit: () => void; finish: () => void; error: Error | null }) {
   const guesses = playData.guesses ?? []
-  return <><p className="card-kicker">Connection made · {playData.play.shared_project_count ?? 0} shared projects</p><h2>{playData.collaborator?.name ?? 'Your collaborator'} is on board</h2><p>Recall as many shared projects as you can. Wrong answers don’t cost points, so keep flying.</p>
+  const resolution = playData.play.resolution_status
+  const pending = resolution === 'pending' || guesses.some((entry) => entry.status === 'pending' || entry.correct === null)
+  const failed = resolution === 'failed'
+  return <><p className="card-kicker">{resolution === 'resolved' || resolution === undefined ? `Connection made · ${playData.play.shared_project_count ?? 0} shared projects` : 'Connection selected'}</p><h2>{playData.collaborator?.name ?? 'Your collaborator'} is on board</h2><p>Recall as many shared projects as you can. Wrong answers don’t cost points, so keep flying.</p>
+    {resolution === 'pending' && <p className="selection-confirmation" role="status">Checking their shared projects — keep guessing.</p>}
+    {failed && <div><p className="inline-error" role="alert">We couldn’t check this collaboration. Your answers are saved.</p><button className="finish-action" type="button" disabled={retrying} onClick={retry}>{retrying ? 'Trying again…' : 'Try again'}</button></div>}
     <SearchPicker label="Shared film or television project" placeholder="Search for a title…" queryKey="projects" selected={project} onSelect={setProject} disabled={submitting || finishing} search={async (query) => (await gameApi.searchProjects(query)).projects} describe={(item) => ({ key: `${item.media_type}-${item.tmdb_id}`, title: item.title, detail: [item.year, item.media_type === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' · ') })} />
-    <button className="primary-action" type="button" disabled={!project || submitting || finishing} onClick={submit}>{submitting ? 'Checking credit…' : 'Submit project'}</button>{error && <InlineError error={error} />}<GuessHistory guesses={guesses} /><button className="finish-action" type="button" disabled={submitting || finishing} onClick={finish}>{finishing ? 'Landing…' : 'I can’t think of anything else'}</button></>
+    <button className="primary-action" type="button" disabled={!project || submitting || finishing} onClick={submit}>{submitting ? 'Checking credit…' : 'Submit project'}</button>{error && <InlineError error={error} />}<GuessHistory guesses={guesses} /><button className="finish-action" type="button" disabled={submitting || finishing || pending || failed} aria-describedby={pending || failed ? 'finish-wait-reason' : undefined} onClick={finish}>{finishing ? 'Landing…' : 'I can’t think of anything else'}</button>{(pending || failed) && <p id="finish-wait-reason" className="empty-attempts" role="status">{failed ? 'Try the collaboration check again before finishing.' : 'You can finish once all checks are complete.'}</p>}</>
 }
 
 function GuessHistory({ guesses }: { guesses: ProjectGuess[] }) {
   if (!guesses.length) return <p className="empty-attempts">Your project attempts will appear here.</p>
-  return <div className="attempts" aria-live="polite"><h3>Flight log</h3><ol>{guesses.map((entry) => <li className={entry.correct ? 'correct' : 'incorrect'} key={entry.id}><span aria-hidden="true">{entry.correct ? '✓' : '×'}</span><div><strong>{entry.project.title}</strong><small>{entry.project.year ?? 'Year unknown'} · {entry.correct ? 'Shared credit' : 'Not a shared credit'}</small></div></li>)}</ol></div>
+  return <div className="attempts" aria-live="polite"><h3>Flight log</h3><ol>{guesses.map((entry) => {
+    const pending = entry.status === 'pending' || entry.correct === null
+    return <li className={pending ? 'pending' : entry.correct ? 'correct' : 'incorrect'} key={entry.id}><span aria-hidden="true">{pending ? '…' : entry.correct ? '✓' : '×'}</span><div><strong>{entry.project.title}</strong><small>{entry.project.year ?? 'Year unknown'} · {pending ? 'Checking this answer — keep guessing.' : entry.correct ? 'Shared credit' : 'Not a shared credit'}</small></div></li>
+  })}</ol></div>
 }
 
 function Result({ playData, incorrectCollaborator, copied, onShare }: { playData: PlayResponse; incorrectCollaborator: boolean; copied: boolean; onShare: () => void }) {
