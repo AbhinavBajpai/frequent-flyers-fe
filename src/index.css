@@ -51,7 +51,8 @@ h1 em { color: var(--orange); font-style: normal; text-shadow: 3px 3px 0 var(--p
 .film-poster::after { content: ''; position: absolute; width: 185px; height: 185px; top: 64px; z-index: -1; border: 2px solid var(--paper); border-radius: 50%; opacity: .35; }
 .poster-presents { margin: 0; text-transform: uppercase; font-size: .55rem; font-weight: 800; letter-spacing: .15em; }
 .poster-art { height: 170px; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: 4px; position: relative; }
-.poster-art i { width: 58px; height: 93px; display: block; border: 2px solid var(--paper); border-bottom: 0; border-radius: 50% 50% 0 0; background: var(--navy); transform: rotate(-5deg); }
+.poster-art i { width: 58px; height: 93px; display: block; border: 2px solid var(--paper); border-bottom: 0; border-radius: 50% 50% 0 0; background: var(--navy); position: relative; transform: rotate(-5deg); }
+.poster-art i::before { content: ''; position: absolute; width: 7px; height: 7px; left: 15px; top: 25px; border-radius: 50%; background: var(--paper); box-shadow: 19px 0 0 var(--paper); }
 .poster-art i:nth-child(2) { height: 76px; opacity: .55; transform: rotate(7deg); }
 .poster-art span { position: absolute; right: 14px; top: 18px; width: 39px; height: 39px; display: grid; place-items: center; border: 2px solid var(--navy); border-radius: 50%; color: var(--navy); background: var(--yellow); font: 800 1.6rem 'League Spartan'; transform: rotate(8deg); }
 .poster-billing { width: 100%; padding-top: 13px; border-top: 1px solid rgba(255,249,233,.65); }
