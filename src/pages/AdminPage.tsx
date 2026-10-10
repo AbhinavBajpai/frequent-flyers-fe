@@ -40,7 +40,7 @@ export function AdminPage() {
 
   if (!adminKey) return <section className="utility-page admin-page admin-login">
     <p className="eyebrow">Operations desk</p><h1>Challenge control</h1>
-    <p className="lede">Enter the configured admin key to manage upcoming departures. It stays in this browser tab only.</p>
+    <p className="lede">Enter the configured admin key to manage upcoming challenges. It stays in this browser tab only.</p>
     <form className="admin-key-card" onSubmit={unlock}><label htmlFor="admin-key">Admin API key</label><div className="input-row"><input id="admin-key" type="password" autoComplete="current-password" value={keyInput} onChange={(event) => setKeyInput(event.target.value)} required /><button type="submit">Open desk</button></div></form>
   </section>
 
@@ -69,7 +69,7 @@ export function AdminPage() {
         <ol className="collaborator-list">{collaborators.data?.collaborators.slice(0, 12).map((person) => <li key={person.id}><span>{person.name}</span><strong>{person.shared_project_count} shared</strong></li>)}</ol>
       </section>
       <section className="admin-panel admin-workflow" aria-labelledby="prepare-heading">
-        <p className="step-label">Step 3</p><h2 id="prepare-heading">Prepare departure</h2>
+        <p className="step-label">Step 3</p><h2 id="prepare-heading">Prepare challenge</h2>
         {!selected && <p className="admin-empty">Choose a featured person first.</p>}
         {selected && !challenge && <button className="panel-action" disabled={createChallenge.isPending || !selected.person.id} onClick={() => createChallenge.mutate()}>{createChallenge.isPending ? 'Creating…' : 'Create draft challenge'}</button>}
         {challenge && <><div className="challenge-state"><span>Status</span><strong>{challenge.status}</strong></div><label htmlFor="schedule-date">UTC challenge date</label>
@@ -79,8 +79,8 @@ export function AdminPage() {
       </section>
     </div>
     <section className="admin-panel calendar-panel" aria-labelledby="calendar-heading">
-      <div className="calendar-heading"><div><p className="step-label">Schedule overview</p><h2 id="calendar-heading">Departure calendar</h2></div><div className="date-range"><label>From<input aria-label="Calendar from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label><label>To<input aria-label="Calendar to" type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label></div></div>
-      {to < from && <p className="admin-alert error" role="alert">The end date must be on or after the start date.</p>}{calendar.isFetching && <p className="admin-status" role="status">Loading departures…</p>}
+      <div className="calendar-heading"><div><p className="step-label">Schedule overview</p><h2 id="calendar-heading">Challenge calendar</h2></div><div className="date-range"><label>From<input aria-label="Calendar from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label><label>To<input aria-label="Calendar to" type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label></div></div>
+      {to < from && <p className="admin-alert error" role="alert">The end date must be on or after the start date.</p>}{calendar.isFetching && <p className="admin-status" role="status">Loading challenges…</p>}
       {calendar.error && <p className="admin-alert error" role="alert">{calendar.error instanceof ApiError && calendar.error.status === 401 ? 'That admin key was not accepted. Lock the desk and try again.' : message(calendar.error)}</p>}
       <div className="calendar-grid">{calendar.data?.days.map((day) => <article key={day.date} className={day.challenge ? `calendar-day ${day.challenge.status}` : 'calendar-day gap'}><time dateTime={day.date}>{new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' })}</time>{day.challenge ? <><strong>{day.challenge.featured_person.name}</strong><span>{day.challenge.status}</span></> : <><strong>Open date</strong><span>Needs challenge</span></>}</article>)}</div>
     </section>

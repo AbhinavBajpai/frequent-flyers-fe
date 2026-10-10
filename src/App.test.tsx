@@ -33,7 +33,7 @@ describe('application routes', () => {
 
   it('renders a useful not-found page', () => {
     renderApp('/missing')
-    expect(screen.getByRole('heading', { name: /route isn’t on the board/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /page doesn’t exist/i })).toBeInTheDocument()
   })
 
   it('supports collaborator selection, project attempts and finishing', async () => {
@@ -62,7 +62,7 @@ describe('application routes', () => {
     expect(await screen.findByText('Good Will Hunting')).toBeInTheDocument()
     expect(screen.queryByText(/Both people are credited/)).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /can’t think/i }))
-    expect(await screen.findByRole('heading', { name: /landed/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /results/i })).toBeInTheDocument()
     expect(screen.getByText(/Both people are credited/)).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/finish'), expect.objectContaining({ method: 'POST' })))

@@ -67,9 +67,9 @@ export function SearchPicker<T>({ label, placeholder, queryKey, search, describe
       />
       {open && query.length >= 2 && (
         <div className="search-results-wrap">
-          {results.isFetching && <p className="search-status" role="status">Checking the departures board…</p>}
+          {results.isFetching && <p className="search-status" role="status">Searching…</p>}
           {results.isError && <p className="search-status search-error" role="alert">Search is unavailable. Please try again.</p>}
-          {!results.isFetching && !results.isError && items.length === 0 && <p className="search-status">No matching passengers found.</p>}
+          {!results.isFetching && !results.isError && items.length === 0 && <p className="search-status">No matches found.</p>}
           {items.length > 0 && (
             <ul id={listId} role="listbox" aria-label={`${label} results`}>
               {items.map((item, index) => {
