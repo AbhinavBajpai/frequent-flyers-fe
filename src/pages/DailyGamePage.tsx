@@ -75,7 +75,6 @@ function FilmPoster({ person }: { person: PersonSummary }) {
     <p className="poster-presents">A Cinema Connects picture</p>
     <div className="poster-art" aria-hidden="true"><i /><i /><span>?</span></div>
     <div className="poster-billing"><small>{billing}</small><strong>{person.name}</strong><b>with…</b></div>
-    <p className="poster-footer">Today’s mystery collaborator</p>
   </aside>
 }
 
