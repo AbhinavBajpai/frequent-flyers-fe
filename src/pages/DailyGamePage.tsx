@@ -60,7 +60,7 @@ export function DailyGamePage() {
   return <section className="game-page">
     <div className="sun-disc" aria-hidden="true" /><div className="cloud cloud-one" aria-hidden="true" /><div className="cloud cloud-two" aria-hidden="true" />
     <div className="game-intro"><p className="eyebrow">Today’s challenge · {challenge.challenge_date}</p><h1>{headlineVariants[headlineIndex](challenge.featured_person.name)}</h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
-    <div className="challenge-card"><FilmPoster person={challenge.featured_person} /><div className="challenge-copy">
+    <div className={`challenge-card ${state === 'guessing_projects' ? 'project-stage' : ''}`}><FilmPoster person={challenge.featured_person} /><div className="challenge-copy">
       {resume.isPending ? <p role="status">Restoring your game…</p> : complete ? <Result playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Cinema Connects ${challenge.challenge_date} 🎬 ${play?.score ?? 0}`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
         : state === 'guessing_projects' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} retrying={retryResolution.isPending} retry={() => retryResolution.mutate()} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? retryResolution.error ?? finish.error} />
           : <CollaboratorRound featured={challenge.featured_person} person={person} setPerson={setPerson} submitting={collaborator.isPending} submit={() => person && collaborator.mutate(person)} error={collaborator.error} />}
@@ -89,19 +89,18 @@ function ProjectRound({ playData, project, setProject, submitting, finishing, re
   const resolution = playData.play.resolution_status
   const pending = resolution === 'pending'
   const failed = resolution === 'failed'
-  return <><h2>You picked {playData.collaborator?.name ?? 'your collaborator'}</h2><p>Recall as many shared projects as you can. Your answers will be revealed when you finish.</p>
+  return <div className="project-round"><div className="project-entry"><h2>You picked {playData.collaborator?.name ?? 'your collaborator'}</h2><p>Recall as many shared projects as you can. Your answers will be revealed when you finish.</p>
     {resolution === 'pending' && <p className="selection-confirmation" role="status">Checking their shared projects — keep guessing.</p>}
     {failed && <div><p className="inline-error" role="alert">We couldn’t check this collaboration. Your answers are saved.</p><button className="finish-action" type="button" disabled={retrying} onClick={retry}>{retrying ? 'Trying again…' : 'Try again'}</button></div>}
     <SearchPicker label="Shared film or television project" placeholder="Search for a title…" queryKey="projects" selected={project} onSelect={setProject} disabled={submitting || finishing} search={async (query) => (await gameApi.searchProjects(query)).projects} describe={(item) => ({ key: `${item.media_type}-${item.tmdb_id}`, title: item.title, detail: [item.year, item.media_type === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' · ') })} />
-    <button className="primary-action" type="button" disabled={!project || submitting || finishing} onClick={submit}>{submitting ? 'Adding project…' : 'Submit project'}</button>{error && <InlineError error={error} />}<GuessHistory guesses={guesses} /><button className="finish-action" type="button" disabled={submitting || finishing || pending || failed} aria-describedby={pending || failed ? 'finish-wait-reason' : undefined} onClick={finish}>{finishing ? 'Finishing…' : 'I can’t think of anything else'}</button>{(pending || failed) && <p id="finish-wait-reason" className="empty-attempts" role="status">{failed ? 'Try the collaboration check again before finishing.' : 'You can finish once the collaboration check is complete.'}</p>}</>
+    <button className="primary-action" type="button" disabled={!project || submitting || finishing} onClick={submit}>{submitting ? 'Adding project…' : 'Submit project'}</button>{error && <InlineError error={error} />}<button className="finish-action" type="button" disabled={submitting || finishing || pending || failed} aria-describedby={pending || failed ? 'finish-wait-reason' : undefined} onClick={finish}>{finishing ? 'Finishing…' : 'I can’t think of anything else'}</button>{(pending || failed) && <p id="finish-wait-reason" className="empty-attempts" role="status">{failed ? 'Try the collaboration check again before finishing.' : 'You can finish once the collaboration check is complete.'}</p>}</div><GuessHistory guesses={guesses} /></div>
 }
 
 function GuessHistory({ guesses }: { guesses: ProjectGuess[] }) {
-  if (!guesses.length) return <p className="empty-attempts">Your project attempts will appear here.</p>
-  return <div className="attempts" aria-live="polite"><h3>Collabs</h3><ol>{guesses.map((entry) => {
+  return <div className="attempts" aria-live="polite"><h3>Collabs</h3>{!guesses.length ? <p className="empty-attempts">Your project attempts will appear here.</p> : <ol>{guesses.map((entry) => {
     const result = entry.outcome === 'both' ? { symbol: '🎬', label: 'Both people are credited' } : entry.outcome === 'one' ? { symbol: '🎟', label: 'Only one person is credited' } : entry.outcome === 'neither' ? { symbol: '🎞', label: 'Neither person is credited' } : null
     return <li className={result ? `outcome-${entry.outcome}` : 'submitted'} key={entry.id}>{result && <span aria-hidden="true">{result.symbol}</span>}<div><strong>{entry.project.title}</strong><small>{entry.project.year ?? 'Year unknown'}{result ? ` · ${result.label}` : ''}</small></div></li>
-  })}</ol></div>
+  })}</ol>}</div>
 }
 
 function Result({ playData, incorrectCollaborator, copied, onShare }: { playData: PlayResponse; incorrectCollaborator: boolean; copied: boolean; onShare: () => void }) {

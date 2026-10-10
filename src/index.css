@@ -46,6 +46,7 @@ h1 { margin: 0; font-size: clamp(3rem, 7.5vw, 6.4rem); line-height: .86; letter-
 h1 em { color: var(--orange); font-style: normal; text-shadow: 3px 3px 0 var(--paper); }
 .lede { max-width: 580px; margin: 25px auto 0; font-size: clamp(1rem, 2vw, 1.18rem); line-height: 1.55; }
 .challenge-card { position: relative; max-width: 850px; margin: 0 auto; display: grid; grid-template-columns: 180px 1fr; background: var(--paper); border: var(--border); box-shadow: 10px 10px 0 var(--navy); transform: rotate(-.35deg); }
+.challenge-card.project-stage { max-width: 1120px; }
 .film-poster { min-height: 390px; padding: 20px 16px 16px; display: flex; flex-direction: column; align-items: center; overflow: hidden; border-right: var(--border); color: var(--paper); background: var(--orange); position: relative; text-align: center; isolation: isolate; }
 .film-poster::before { content: ''; position: absolute; inset: 0; z-index: -2; opacity: .2; background: repeating-linear-gradient(135deg, transparent 0 12px, var(--navy) 12px 14px); }
 .film-poster::after { content: ''; position: absolute; width: 185px; height: 185px; top: 64px; z-index: -1; border: 2px solid var(--paper); border-radius: 50%; opacity: .35; }
@@ -60,6 +61,8 @@ h1 em { color: var(--orange); font-style: normal; text-shadow: 3px 3px 0 var(--p
 .poster-billing strong { display: block; font: 800 1.42rem/.95 'League Spartan'; text-transform: uppercase; text-wrap: balance; }
 .poster-billing b { display: block; margin-top: 11px; color: var(--yellow); font: 800 1.55rem/1 'League Spartan'; text-transform: uppercase; letter-spacing: .04em; }
 .challenge-copy { padding: 32px clamp(25px, 4vw, 46px); }
+.project-round { display: grid; grid-template-columns: minmax(330px, 1.15fr) minmax(230px, .85fr); gap: clamp(28px, 4vw, 52px); align-items: start; }
+.project-entry > p { line-height: 1.5; }
 .challenge-copy h2, .notice-card h2 { margin: 0 0 10px; font-size: clamp(1.55rem, 3vw, 2.2rem); text-transform: uppercase; letter-spacing: -.03em; }
 .challenge-copy > p:not(.card-kicker) { margin: 0 0 25px; line-height: 1.5; }
 .card-kicker { color: var(--orange); margin-bottom: 7px; }
@@ -85,8 +88,9 @@ button:not(:disabled) { cursor: pointer; }
 .search-error { color: #8b291d; }
 .empty-attempts { margin: 18px 0 0 !important; padding: 12px; border: 1px dashed var(--navy); opacity: .7; font-size: .85rem; }
 .attempts { margin-top: 22px; }
+.project-round > .attempts { margin-top: 0; }
 .attempts h3 { margin: 0 0 8px; font: 800 .76rem 'DM Sans'; letter-spacing: .1em; text-transform: uppercase; }
-.attempts ol { max-height: 220px; margin: 0; padding: 0; overflow-y: auto; list-style: none; border: var(--border); }
+.attempts ol { margin: 0; padding: 0; list-style: none; border: var(--border); }
 .attempts li { display: flex; align-items: center; gap: 12px; padding: 9px 12px; background: #fff; border-bottom: 1px solid rgba(21,49,71,.22); }
 .attempts li:last-child { border-bottom: 0; }
 .attempts li > span { display: grid; place-items: center; width: 27px; height: 27px; flex: 0 0 auto; border: 2px solid var(--navy); color: var(--paper); background: var(--orange); font-weight: 800; }
@@ -165,6 +169,11 @@ small { display: block; margin-top: 8px; opacity: .67; }
 .calendar-day.published { background: #d7ead1; }
 .calendar-day.scheduled { background: var(--yellow); }
 .site-footer { min-height: 56px; padding: 14px clamp(22px, 5vw, 76px); display: flex; align-items: center; justify-content: space-between; gap: 20px; color: var(--paper); background: var(--navy); font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; }
+
+@media (max-width: 960px) {
+  .project-round { grid-template-columns: 1fr; }
+  .project-round > .attempts { margin-top: 6px; }
+}
 
 @media (max-width: 680px) {
   .site-header { height: 66px; padding-inline: 16px; }
