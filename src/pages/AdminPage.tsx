@@ -75,7 +75,7 @@ export function AdminPage() {
         {challenge && <><div className="challenge-state"><span>Status</span><strong>{challenge.status}</strong></div><label htmlFor="schedule-date">UTC challenge date</label>
           <div className="input-row"><input id="schedule-date" type="date" value={scheduleDate} disabled={challenge.status === 'published'} onChange={(event) => setScheduleDate(event.target.value)} /><button disabled={schedule.isPending || challenge.status === 'published'} onClick={() => schedule.mutate()}>{schedule.isPending ? 'Saving…' : 'Schedule'}</button></div>
           <div className="admin-action-row"><button className="secondary-button" disabled={preview.isPending || challenge.status === 'published'} onClick={() => preview.mutate()}>{preview.isPending ? 'Refreshing…' : 'Refresh preview'}</button><button disabled={publish.isPending || challenge.status !== 'scheduled'} onClick={() => publish.mutate()}>{publish.isPending ? 'Publishing…' : 'Publish challenge'}</button></div>
-          {preview.data && <div className="preview-card" role="status"><strong>{preview.data.collaborator_count} collaborators</strong><span>{preview.data.project_pairs} shared project pairs will be frozen at publish.</span></div>}</>}
+          {preview.data && <div className="preview-card" role="status"><strong>{preview.data.collaborator_count} cached collaborators</strong><span>{preview.data.project_pairs} shared project pairs are currently cached. New answers are checked when played.</span></div>}</>}
       </section>
     </div>
     <section className="admin-panel calendar-panel" aria-labelledby="calendar-heading">

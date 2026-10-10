@@ -44,7 +44,7 @@ it('runs the admin discovery, scheduling, preview and publish workflow', async (
   await user.click(screen.getByRole('button', { name: /^schedule$/i }))
   expect(await screen.findByText(/^scheduled$/i)).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: /refresh preview/i }))
-  expect(await screen.findByText(/18 collaborators/i)).toBeInTheDocument()
+  expect(await screen.findByText(/18 cached collaborators/i)).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: /publish challenge/i }))
   expect(await screen.findByText(/published with 57 project pairs/i)).toBeInTheDocument()
   await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/publish'), expect.objectContaining({ method: 'POST', headers: expect.objectContaining({ 'X-Admin-Key': 'secret' }) })))
