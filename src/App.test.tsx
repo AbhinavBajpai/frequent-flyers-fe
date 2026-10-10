@@ -60,6 +60,7 @@ describe('application routes', () => {
     await user.click(await screen.findByRole('option', { name: /Good Will Hunting/i }, { timeout: 1500 }))
     await user.click(screen.getByRole('button', { name: /submit project/i }))
     expect(await screen.findByText('Good Will Hunting')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /shared film/i })).toHaveValue('')
     expect(screen.queryByText(/Both people are credited/)).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /can’t think/i }))
     expect(await screen.findByRole('heading', { name: /results/i })).toBeInTheDocument()
