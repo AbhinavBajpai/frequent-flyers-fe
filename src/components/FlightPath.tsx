@@ -1,4 +1,4 @@
-const checkpoints = ['Take-off', 'Connection', 'Final call']
+const checkpoints = ['Your pick', 'Collabs', 'Results']
 
 export function FlightPath({ stage = 0 }: { stage?: 0 | 1 | 2 }) {
   return (
