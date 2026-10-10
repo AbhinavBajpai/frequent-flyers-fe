@@ -6,7 +6,6 @@ import { FlightPath } from '../components/FlightPath'
 import { SearchPicker } from '../components/SearchPicker'
 
 const requestKey = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase()
 const headlineVariants = [
   (name: string) => `Who is ${name}’s fave?`,
   (name: string) => `Who answers immediately when ${name} calls?`,
@@ -65,7 +64,7 @@ export function DailyGamePage() {
   return <section className="game-page">
     <div className="sun-disc" aria-hidden="true" /><div className="cloud cloud-one" aria-hidden="true" /><div className="cloud cloud-two" aria-hidden="true" />
     <div className="game-intro"><p className="eyebrow">Today’s challenge · {challenge.challenge_date}</p><h1>{headlineVariants[headlineIndex](challenge.featured_person.name)}</h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
-    <div className="challenge-card"><Portrait person={challenge.featured_person} /><div className="challenge-copy">
+    <div className="challenge-card"><FilmPoster person={challenge.featured_person} /><div className="challenge-copy">
       {resume.isPending ? <p role="status">Restoring your flight…</p> : complete ? <Result playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Cinema Connects ${challenge.challenge_date} 🎬 ${play?.score ?? 0}`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
         : state === 'guessing_projects' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} retrying={retryResolution.isPending} retry={() => retryResolution.mutate()} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? retryResolution.error ?? finish.error} />
           : <CollaboratorRound featured={challenge.featured_person} person={person} setPerson={setPerson} submitting={collaborator.isPending} submit={() => person && collaborator.mutate(person)} error={collaborator.error} />}
@@ -73,7 +72,16 @@ export function DailyGamePage() {
   </section>
 }
 
-function Portrait({ person }: { person: PersonSummary }) { return <div className="portrait">{person.profile_url ? <img src={person.profile_url} alt="" /> : <span>{initials(person.name)}</span>}</div> }
+function FilmPoster({ person }: { person: PersonSummary }) {
+  const department = person.known_for_department?.toLowerCase()
+  const billing = department === 'directing' ? 'Directed by' : department === 'writing' ? 'Written by' : 'Starring'
+  return <aside className="film-poster" aria-label={`Film poster: ${billing} ${person.name}, with an unknown collaborator`}>
+    <p className="poster-presents">A Cinema Connects picture</p>
+    <div className="poster-art" aria-hidden="true"><i /><i /><span>?</span></div>
+    <div className="poster-billing"><small>{billing}</small><strong>{person.name}</strong><b>with…</b></div>
+    <p className="poster-footer">Today’s mystery collaborator</p>
+  </aside>
+}
 
 function CollaboratorRound({ featured, person, setPerson, submitting, submit, error }: { featured: PersonSummary; person: PersonSummary | null; setPerson: (value: PersonSummary | null) => void; submitting: boolean; submit: () => void; error: Error | null }) {
   return <><p className="card-kicker">Your one connection</p><h2>Choose a frequent collaborator</h2><p>Your choice locks after submission. Pick carefully—the more shared credits, the higher your possible score.</p>

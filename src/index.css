@@ -46,10 +46,19 @@ h1 { margin: 0; font-size: clamp(3rem, 7.5vw, 6.4rem); line-height: .86; letter-
 h1 em { color: var(--orange); font-style: normal; text-shadow: 3px 3px 0 var(--paper); }
 .lede { max-width: 580px; margin: 25px auto 0; font-size: clamp(1rem, 2vw, 1.18rem); line-height: 1.55; }
 .challenge-card { position: relative; max-width: 850px; margin: 0 auto; display: grid; grid-template-columns: 180px 1fr; background: var(--paper); border: var(--border); box-shadow: 10px 10px 0 var(--navy); transform: rotate(-.35deg); }
-.portrait { min-height: 290px; display: grid; place-items: center; overflow: hidden; border-right: var(--border); background: var(--orange); position: relative; }
-.portrait::before { content: ''; position: absolute; width: 110px; height: 150px; border-radius: 48% 48% 18% 18%; background: var(--navy); transform: rotate(7deg); }
-.portrait span { z-index: 1; color: var(--paper); font: 800 2.5rem 'League Spartan'; transform: rotate(-7deg); }
-.portrait img { position: relative; z-index: 2; width: 100%; height: 100%; min-height: 290px; object-fit: cover; filter: saturate(.75) contrast(1.08); }
+.film-poster { min-height: 390px; padding: 20px 16px 16px; display: flex; flex-direction: column; align-items: center; overflow: hidden; border-right: var(--border); color: var(--paper); background: var(--orange); position: relative; text-align: center; isolation: isolate; }
+.film-poster::before { content: ''; position: absolute; inset: 0; z-index: -2; opacity: .2; background: repeating-linear-gradient(135deg, transparent 0 12px, var(--navy) 12px 14px); }
+.film-poster::after { content: ''; position: absolute; width: 185px; height: 185px; top: 64px; z-index: -1; border: 2px solid var(--paper); border-radius: 50%; opacity: .35; }
+.poster-presents, .poster-footer { margin: 0; text-transform: uppercase; font-size: .55rem; font-weight: 800; letter-spacing: .15em; }
+.poster-art { height: 170px; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: 4px; position: relative; }
+.poster-art i { width: 58px; height: 93px; display: block; border: 2px solid var(--paper); border-bottom: 0; border-radius: 50% 50% 0 0; background: var(--navy); transform: rotate(-5deg); }
+.poster-art i:nth-child(2) { height: 76px; opacity: .55; transform: rotate(7deg); }
+.poster-art span { position: absolute; right: 14px; top: 18px; width: 39px; height: 39px; display: grid; place-items: center; border: 2px solid var(--navy); border-radius: 50%; color: var(--navy); background: var(--yellow); font: 800 1.6rem 'League Spartan'; transform: rotate(8deg); }
+.poster-billing { width: 100%; padding-top: 13px; border-top: 1px solid rgba(255,249,233,.65); }
+.poster-billing small { margin: 0 0 3px; opacity: .85; text-transform: uppercase; font-size: .55rem; font-weight: 800; letter-spacing: .12em; }
+.poster-billing strong { display: block; font: 800 1.42rem/.95 'League Spartan'; text-transform: uppercase; text-wrap: balance; }
+.poster-billing b { display: block; margin-top: 11px; color: var(--yellow); font: 800 1.55rem/1 'League Spartan'; text-transform: uppercase; letter-spacing: .04em; }
+.poster-footer { margin-top: auto; opacity: .75; }
 .challenge-copy { padding: 32px clamp(25px, 4vw, 46px); }
 .challenge-copy h2, .notice-card h2 { margin: 0 0 10px; font-size: clamp(1.55rem, 3vw, 2.2rem); text-transform: uppercase; letter-spacing: -.03em; }
 .challenge-copy > p:not(.card-kicker) { margin: 0 0 25px; line-height: 1.5; }
@@ -163,9 +172,10 @@ small { display: block; margin-top: 8px; opacity: .67; }
   .site-header nav a { padding-inline: 8px; font-size: .67rem; }
   .game-page { padding-inline: 18px; }
   .challenge-card { grid-template-columns: 1fr; transform: none; box-shadow: 6px 6px 0 var(--navy); }
-  .portrait { min-height: 115px; border-right: 0; border-bottom: var(--border); }
-  .portrait::before { height: 90px; top: 19px; }
-  .portrait img { min-height: 175px; max-height: 230px; }
+  .film-poster { min-height: 285px; border-right: 0; border-bottom: var(--border); }
+  .poster-art { height: 105px; }
+  .poster-art i { height: 72px; }
+  .poster-art i:nth-child(2) { height: 58px; }
   .challenge-copy { padding: 25px 20px 28px; }
   .input-row { display: grid; gap: 8px; }
   button { height: 48px; margin: 0; }

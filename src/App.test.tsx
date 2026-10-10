@@ -21,6 +21,7 @@ describe('application routes', () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation((input) => String(input).includes('/plays/') ? response({ play: daily.play }) : response(daily))
     renderApp()
     expect(await screen.findByRole('heading', { name: /who is ben affleck’s fave/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/film poster: starring ben affleck, with an unknown collaborator/i)).toBeInTheDocument()
     expect(await screen.findByRole('combobox', { name: /actor, director/i })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument()
   })
