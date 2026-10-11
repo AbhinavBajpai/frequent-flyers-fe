@@ -9,6 +9,14 @@ export interface PlaySummary { id: string; state: PlayState; score?: number; cor
 export interface ProjectGuess { id: string; correct?: boolean | null; status?: ProjectGuessStatus; outcome?: ProjectGuessOutcome; symbol?: string; project: ProjectSummary }
 export interface ShareResult { challenge_date: string; score: number; shared_project_count: number; correct_guesses: number; incorrect_guesses: number; share_text: string }
 export interface DailyResponse { challenge: Challenge; play: PlaySummary; server_time: string }
+export interface ArchiveChallenge { id: string; number: number; challenge_date: string; featured_person: PersonSummary; completed: boolean; play_state: PlayState | null; score: number | null }
+export interface ArchiveResponse { challenges: ArchiveChallenge[] }
+export interface AccountUser { id: string; email: string; is_admin: boolean }
+export interface AuthResponse { user: AccountUser }
+export interface FriendInviteResponse { invite: { token: string; expires_at: string } }
+export interface FriendsResponse { friends: AccountUser[] }
+export interface FriendResult { user: AccountUser; score: number; collaboration_count: number; correct_project_guesses: number; completed_at: string }
+export interface FriendResultsResponse { results: FriendResult[] }
 export interface PlayResponse { play: PlaySummary; collaborator?: PersonSummary | null; guesses?: ProjectGuess[]; missed_shared_projects?: ProjectSummary[]; result?: ShareResult; share?: ShareResult }
 export interface CollaboratorResponse extends PlayResponse { shared_project_count?: number }
 export interface ProjectGuessResponse { guess: ProjectGuess; play: PlaySummary }

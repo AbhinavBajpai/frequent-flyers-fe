@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { adminApi, ApiError } from '../api/client'
+import { Link } from 'react-router-dom'
+import { adminApi, ApiError, authApi } from '../api/client'
 import type { AdminChallenge, AdminImportResponse, AdminPersonResult } from '../api/types'
 
-const keyStorage = 'frequent-flyers-admin-key'
 function isoDate(offset = 0) { const value = new Date(); value.setUTCDate(value.getUTCDate() + offset); return value.toISOString().slice(0, 10) }
 function message(error: unknown) { return error instanceof Error ? error.message : 'Something went wrong. Please try again.' }
 function knownFor(person: AdminPersonResult) {
@@ -13,8 +13,7 @@ function knownFor(person: AdminPersonResult) {
 
 export function AdminPage() {
   const queryClient = useQueryClient()
-  const [adminKey, setAdminKey] = useState(() => sessionStorage.getItem(keyStorage) ?? '')
-  const [keyInput, setKeyInput] = useState(adminKey)
+  const account = useQuery({ queryKey: ['account'], queryFn: authApi.me, retry: false })
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<AdminImportResponse | null>(null)
@@ -24,29 +23,24 @@ export function AdminPage() {
   const [to, setTo] = useState(isoDate(13))
   const [notice, setNotice] = useState('')
 
-  const search = useQuery({ queryKey: ['admin', 'people', adminKey, searchTerm], queryFn: () => adminApi.searchPeople(adminKey, searchTerm), enabled: Boolean(adminKey && searchTerm.length >= 2), retry: false })
-  const collaborators = useQuery({ queryKey: ['admin', 'collaborators', selected?.person.id], queryFn: () => adminApi.getCollaborators(adminKey, selected!.person.id!), enabled: Boolean(adminKey && selected?.person.id), retry: false })
-  const calendar = useQuery({ queryKey: ['admin', 'calendar', adminKey, from, to], queryFn: () => adminApi.getCalendar(adminKey, from, to), enabled: Boolean(adminKey && from && to && to >= from), retry: false })
-  const importPerson = useMutation({ mutationFn: (person: AdminPersonResult) => adminApi.importPerson(adminKey, person.tmdb_id), onSuccess: (data) => { setSelected(data); setChallenge(null); setNotice(`${data.person.name} imported with ${data.qualified_projects} qualifying credits.`) } })
-  const createChallenge = useMutation({ mutationFn: () => adminApi.createChallenge(adminKey, selected!.person.id!), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice('Draft challenge created.') } })
-  const schedule = useMutation({ mutationFn: () => adminApi.scheduleChallenge(adminKey, challenge!.id, scheduleDate), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice(`Challenge scheduled for ${scheduleDate}.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }) } })
-  const preview = useMutation({ mutationFn: () => adminApi.previewChallenge(adminKey, challenge!.id) })
-  const publish = useMutation({ mutationFn: () => adminApi.publishChallenge(adminKey, challenge!.id), onSuccess: ({ challenge: next, snapshot_projects: count }) => { setChallenge(next); setNotice(`Challenge published with ${count} project pairs.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }) } })
+  const search = useQuery({ queryKey: ['admin', 'people', searchTerm], queryFn: () => adminApi.searchPeople(searchTerm), enabled: Boolean(account.data?.is_admin && searchTerm.length >= 2), retry: false })
+  const collaborators = useQuery({ queryKey: ['admin', 'collaborators', selected?.person.id], queryFn: () => adminApi.getCollaborators(selected!.person.id!), enabled: Boolean(account.data?.is_admin && selected?.person.id), retry: false })
+  const calendar = useQuery({ queryKey: ['admin', 'calendar', from, to], queryFn: () => adminApi.getCalendar(from, to), enabled: Boolean(account.data?.is_admin && from && to && to >= from), retry: false })
+  const importPerson = useMutation({ mutationFn: (person: AdminPersonResult) => adminApi.importPerson(person.tmdb_id), onSuccess: (data) => { setSelected(data); setChallenge(null); setNotice(`${data.person.name} imported with ${data.qualified_projects} qualifying credits.`) } })
+  const createChallenge = useMutation({ mutationFn: () => adminApi.createChallenge(selected!.person.id!), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice('Draft challenge created.') } })
+  const schedule = useMutation({ mutationFn: () => adminApi.scheduleChallenge(challenge!.id, scheduleDate), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice(`Challenge scheduled for ${scheduleDate}.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }) } })
+  const preview = useMutation({ mutationFn: () => adminApi.previewChallenge(challenge!.id) })
+  const publish = useMutation({ mutationFn: () => adminApi.publishChallenge(challenge!.id), onSuccess: ({ challenge: next, snapshot_projects: count }) => { setChallenge(next); setNotice(`Challenge published with ${count} project pairs.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }) } })
 
-  function unlock(event: FormEvent) { event.preventDefault(); const value = keyInput.trim(); if (!value) return; sessionStorage.setItem(keyStorage, value); setAdminKey(value) }
-  function signOut() { sessionStorage.removeItem(keyStorage); setAdminKey(''); setKeyInput(''); setSelected(null); setChallenge(null); setNotice(''); queryClient.removeQueries({ queryKey: ['admin'] }) }
   function searchPeople(event: FormEvent) { event.preventDefault(); setSearchTerm(searchInput.trim()) }
   function chooseCached(person: AdminPersonResult) { setSelected({ person: { ...person, source: 'tmdb' }, qualified_projects: 0 }); setChallenge(null); setNotice(`${person.name} is already in the local catalogue.`) }
 
-  if (!adminKey) return <section className="utility-page admin-page admin-login">
-    <p className="eyebrow">Operations desk</p><h1>Challenge control</h1>
-    <p className="lede">Enter the configured admin key to manage upcoming challenges. It stays in this browser tab only.</p>
-    <form className="admin-key-card" onSubmit={unlock}><label htmlFor="admin-key">Admin API key</label><div className="input-row"><input id="admin-key" type="password" autoComplete="current-password" value={keyInput} onChange={(event) => setKeyInput(event.target.value)} required /><button type="submit">Open desk</button></div></form>
-  </section>
+  if (account.isPending) return <section className="utility-page admin-page"><p role="status">Checking access…</p></section>
+  if (!account.data?.is_admin) return <section className="utility-page admin-page"><p className="eyebrow">Restricted</p><h1>Access denied</h1><p className="lede">You need an administrator account to open challenge control.</p><Link className="text-action" to="/account">Log in</Link></section>
 
   const actionError = importPerson.error || createChallenge.error || schedule.error || preview.error || publish.error
   return <section className="utility-page admin-page">
-    <header className="admin-heading"><div><p className="eyebrow">Operations desk</p><h1>Challenge control</h1><p className="lede">Discover talent, inspect their routes, then schedule and publish a daily challenge.</p></div><button className="secondary-button" onClick={signOut}>Lock desk</button></header>
+    <header className="admin-heading"><div><p className="eyebrow">Operations desk</p><h1>Challenge control</h1><p className="lede">Discover talent, inspect their routes, then schedule and publish a daily challenge.</p></div></header>
     {notice && <p className="admin-alert success" role="status">✓ {notice}</p>}
     {actionError && <p className="admin-alert error" role="alert">{message(actionError)}</p>}
     <div className="admin-grid">
@@ -81,7 +75,7 @@ export function AdminPage() {
     <section className="admin-panel calendar-panel" aria-labelledby="calendar-heading">
       <div className="calendar-heading"><div><p className="step-label">Schedule overview</p><h2 id="calendar-heading">Challenge calendar</h2></div><div className="date-range"><label>From<input aria-label="Calendar from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label><label>To<input aria-label="Calendar to" type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label></div></div>
       {to < from && <p className="admin-alert error" role="alert">The end date must be on or after the start date.</p>}{calendar.isFetching && <p className="admin-status" role="status">Loading challenges…</p>}
-      {calendar.error && <p className="admin-alert error" role="alert">{calendar.error instanceof ApiError && calendar.error.status === 401 ? 'That admin key was not accepted. Lock the desk and try again.' : message(calendar.error)}</p>}
+      {calendar.error && <p className="admin-alert error" role="alert">{calendar.error instanceof ApiError && calendar.error.status === 403 ? 'Your account no longer has administrator access.' : message(calendar.error)}</p>}
       <div className="calendar-grid">{calendar.data?.days.map((day) => <article key={day.date} className={day.challenge ? `calendar-day ${day.challenge.status}` : 'calendar-day gap'}><time dateTime={day.date}>{new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' })}</time>{day.challenge ? <><strong>{day.challenge.featured_person.name}</strong><span>{day.challenge.status}</span></> : <><strong>Open date</strong><span>Needs challenge</span></>}</article>)}</div>
     </section>
   </section>

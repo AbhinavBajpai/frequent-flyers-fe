@@ -14,11 +14,12 @@ function renderAdmin() {
   return render(<MemoryRouter initialEntries={['/admin']}><QueryClientProvider client={client}><App /></QueryClientProvider></MemoryRouter>)
 }
 
-afterEach(() => { sessionStorage.clear(); vi.restoreAllMocks() })
+afterEach(() => { vi.restoreAllMocks() })
 
 it('runs the admin discovery, scheduling, preview and publish workflow', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
     const url = String(input)
+    if (url.includes('/auth/me')) return response({ user: { id: 'admin-1', email: 'admin@example.com', is_admin: true } })
     if (url.includes('/calendar')) return response({ days: [{ date: '2026-10-10', challenge: null }] })
     if (url.includes('/people/search')) return response({ source: 'tmdb', results: [{ id: 880, name: 'Ben Affleck', known_for_department: 'Acting', profile_path: null }] })
     if (url.endsWith('/people/880/import')) return response({ person, qualified_projects: 42 })
@@ -31,8 +32,6 @@ it('runs the admin discovery, scheduling, preview and publish workflow', async (
   })
   const user = userEvent.setup()
   renderAdmin()
-  await user.type(screen.getByLabelText(/admin api key/i), 'secret')
-  await user.click(screen.getByRole('button', { name: /open desk/i }))
   expect(await screen.findByText(/open date/i)).toBeInTheDocument()
   await user.type(screen.getByLabelText(/^name$/i), 'Ben Affleck')
   await user.click(screen.getByRole('button', { name: /^search$/i }))
@@ -47,5 +46,5 @@ it('runs the admin discovery, scheduling, preview and publish workflow', async (
   expect(await screen.findByText(/18 cached collaborators/i)).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: /publish challenge/i }))
   expect(await screen.findByText(/published with 57 project pairs/i)).toBeInTheDocument()
-  await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/publish'), expect.objectContaining({ method: 'POST', headers: expect.objectContaining({ 'X-Admin-Key': 'secret' }) })))
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/publish'), expect.objectContaining({ method: 'POST', credentials: 'include' })))
 })

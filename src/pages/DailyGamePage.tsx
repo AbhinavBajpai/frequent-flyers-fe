@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { ApiError, gameApi } from '../api/client'
+import { useParams } from 'react-router-dom'
+import { ApiError, friendsApi, gameApi } from '../api/client'
 import type { CollaboratorResponse, PersonSummary, PlayResponse, ProjectGuess, ProjectSummary } from '../api/types'
 import { FlightPath } from '../components/FlightPath'
 import { SearchPicker } from '../components/SearchPicker'
@@ -20,12 +21,13 @@ const headlineVariants = [
 ]
 
 export function DailyGamePage() {
+  const { challengeId } = useParams()
   const cache = useQueryClient()
   const [person, setPerson] = useState<PersonSummary | null>(null)
   const [project, setProject] = useState<ProjectSummary | null>(null)
   const [copied, setCopied] = useState(false)
   const [headlineIndex] = useState(() => Math.floor(Math.random() * headlineVariants.length))
-  const daily = useQuery({ queryKey: ['daily-challenge'], queryFn: gameApi.getDaily, retry: false })
+  const daily = useQuery({ queryKey: ['challenge', challengeId ?? 'daily'], queryFn: () => challengeId ? gameApi.getChallenge(challengeId) : gameApi.getDaily(), retry: false })
   const playId = daily.data?.play.id
   const resume = useQuery({
     queryKey: ['play', playId],
@@ -69,9 +71,9 @@ export function DailyGamePage() {
   const incorrectCollaborator = complete && play?.shared_project_count === 0
   const stage: 0 | 1 | 2 = complete ? 2 : state === 'guessing_projects' ? 1 : 0
   return <section className="game-page">
-    <div className="game-intro"><p className="eyebrow">Today’s challenge · {challenge.challenge_date}</p><h1>{headlineVariants[headlineIndex](challenge.featured_person.name)}</h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
+    <div className="game-intro"><p className="eyebrow">{challengeId ? `Archive challenge #${challenge.number}` : 'Today’s challenge'} · {challenge.challenge_date}</p><h1>{headlineVariants[headlineIndex](challenge.featured_person.name)}</h1><p className="lede">Name one person they’ve worked with, then recall every shared project you can.</p></div>
     <div className={`challenge-card ${state === 'guessing_projects' ? 'project-stage' : ''}`}><FilmPoster person={challenge.featured_person} /><div className="challenge-copy">
-      {resume.isPending ? <p role="status">Restoring your game…</p> : complete ? <Result playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Cinema Connects #${challenge.number} 🎬\n${play?.score ?? 0}pts`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
+      {resume.isPending ? <p role="status">Restoring your game…</p> : complete ? <Result challengeId={challenge.id} playData={playData!} incorrectCollaborator={incorrectCollaborator} copied={copied} onShare={async () => { const text = (playData?.result ?? playData?.share)?.share_text ?? `Cinema Connects #${challenge.number} 🎬\n${play?.score ?? 0}pts`; await navigator.clipboard?.writeText(text); setCopied(true) }} />
         : state === 'guessing_projects' ? <ProjectRound playData={playData!} project={project} setProject={setProject} submitting={guess.isPending} finishing={finish.isPending} retrying={retryResolution.isPending} retry={() => retryResolution.mutate()} submit={() => project && guess.mutate(project)} finish={() => finish.mutate()} error={guess.error ?? retryResolution.error ?? finish.error} />
           : <CollaboratorRound featured={challenge.featured_person} person={person} setPerson={setPerson} submitting={collaborator.isPending} submit={() => person && collaborator.mutate(person)} error={collaborator.error} />}
     </div></div><FlightPath stage={stage} />
@@ -113,9 +115,10 @@ function GuessHistory({ guesses }: { guesses: ProjectGuess[] }) {
   })}</ol>}</div>
 }
 
-function Result({ playData, incorrectCollaborator, copied, onShare }: { playData: PlayResponse; incorrectCollaborator: boolean; copied: boolean; onShare: () => void }) {
+function Result({ challengeId, playData, incorrectCollaborator, copied, onShare }: { challengeId: string; playData: PlayResponse; incorrectCollaborator: boolean; copied: boolean; onShare: () => void }) {
+  const friendResults = useQuery({ queryKey: ['friend-results', challengeId], queryFn: () => friendsApi.challengeResults(challengeId), retry: false })
   const result = playData.result ?? playData.share
-  return <div className="result-panel"><p className="card-kicker">Challenge complete</p><h2>{incorrectCollaborator ? 'Connection missed' : 'Results'}</h2>{playData.guesses && <GuessHistory guesses={playData.guesses} />}<div className="score-stamp"><strong>{playData.play.score}</strong><span>points</span></div><p>{incorrectCollaborator ? 'That person didn’t share a qualifying project with today’s featured person.' : `${result?.correct_guesses ?? playData.play.correct_guesses ?? 0} correct project guesses from ${result?.shared_project_count ?? playData.play.shared_project_count ?? 0} shared credits.`}</p>{(playData.missed_shared_projects?.length ?? 0) > 0 && <details><summary>See missed shared projects</summary><ul className="missed-list">{playData.missed_shared_projects!.map((item) => <li key={`${item.media_type}-${item.tmdb_id}`}>{item.title} {item.year ? `(${item.year})` : ''}</li>)}</ul></details>}<button className="primary-action" type="button" onClick={onShare}>{copied ? 'Copied to clipboard!' : 'Copy result'}</button></div>
+  return <div className="result-panel"><p className="card-kicker">Challenge complete</p><h2>{incorrectCollaborator ? 'Connection missed' : 'Results'}</h2>{playData.guesses && <GuessHistory guesses={playData.guesses} />}<div className="score-stamp"><strong>{playData.play.score}</strong><span>points</span></div><p>{incorrectCollaborator ? 'That person didn’t share a qualifying project with today’s featured person.' : `${result?.correct_guesses ?? playData.play.correct_guesses ?? 0} correct project guesses from ${result?.shared_project_count ?? playData.play.shared_project_count ?? 0} shared credits.`}</p>{(playData.missed_shared_projects?.length ?? 0) > 0 && <details><summary>See missed shared projects</summary><ul className="missed-list">{playData.missed_shared_projects!.map((item) => <li key={`${item.media_type}-${item.tmdb_id}`}>{item.title} {item.year ? `(${item.year})` : ''}</li>)}</ul></details>}{friendResults.data && friendResults.data.results.length > 0 && <div className="friend-results"><h3>Friends’ scores</h3><ul>{friendResults.data.results.map((entry) => <li key={entry.user.id}><span>{entry.user.email}</span><strong>{entry.score}pts</strong></li>)}</ul></div>}<button className="primary-action" type="button" onClick={onShare}>{copied ? 'Copied to clipboard!' : 'Copy result'}</button></div>
 }
 
 function InlineError({ error }: { error: Error }) { const duplicate = error instanceof ApiError && error.code === 'project_already_guessed'; return <p className="inline-error" role="alert">{duplicate ? 'That project is already in your collabs.' : error.message}</p> }

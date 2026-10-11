@@ -27,9 +27,28 @@ describe('application routes', () => {
     expect(screen.queryByRole('link', { name: /admin/i })).not.toBeInTheDocument()
   })
 
-  it('renders the admin placeholder', () => {
+  it('protects the admin route from anonymous visitors', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input) => String(input).includes('/auth/me') ? response({}, 401) : response({}, 404))
     renderApp('/admin')
-    expect(screen.getByRole('heading', { name: /challenge control/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /access denied/i })).toBeInTheDocument()
+  })
+
+  it('signs up and sends the player to their archive', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+      const url = String(input)
+      if (url.includes('/auth/me')) return response({}, 401)
+      if (url.includes('/auth/signup')) return response({ user: { id: 'user-1', email: 'player@example.com', is_admin: false } }, 201)
+      if (url.includes('/challenges/archive')) return response({ challenges: [] })
+      return response({}, 404)
+    })
+    const user = userEvent.setup()
+    renderApp('/account')
+    await user.click(await screen.findByRole('button', { name: /sign up/i }))
+    await user.type(screen.getByLabelText(/email/i), 'player@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'longpassword')
+    await user.click(screen.getByRole('button', { name: /create account/i }))
+    expect(await screen.findByRole('heading', { name: /archive/i })).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/auth/signup'), expect.objectContaining({ method: 'POST', credentials: 'include' }))
   })
 
   it('renders a useful not-found page', () => {
