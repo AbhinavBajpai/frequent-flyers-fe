@@ -20,6 +20,7 @@ it('runs the admin discovery, scheduling, preview and publish workflow', async (
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
     const url = String(input)
     if (url.includes('/auth/me')) return response({ user: { id: 'admin-1', email: 'admin@example.com', is_admin: true } })
+    if (url.endsWith('/admin/challenges') && !init?.method) return response({ challenges: [] })
     if (url.includes('/calendar')) return response({ days: [{ date: '2026-10-10', challenge: null }] })
     if (url.includes('/people/search')) return response({ source: 'tmdb', results: [{ id: 880, name: 'Ben Affleck', known_for_department: 'Acting', profile_path: null }] })
     if (url.endsWith('/people/880/import')) return response({ person, qualified_projects: 42 })

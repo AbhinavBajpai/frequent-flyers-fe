@@ -24,16 +24,18 @@ export function AdminPage() {
   const [notice, setNotice] = useState('')
 
   const search = useQuery({ queryKey: ['admin', 'people', searchTerm], queryFn: () => adminApi.searchPeople(searchTerm), enabled: Boolean(account.data?.is_admin && searchTerm.length >= 2), retry: false })
+  const challenges = useQuery({ queryKey: ['admin', 'challenges'], queryFn: adminApi.getChallenges, enabled: Boolean(account.data?.is_admin), retry: false })
   const collaborators = useQuery({ queryKey: ['admin', 'collaborators', selected?.person.id], queryFn: () => adminApi.getCollaborators(selected!.person.id!), enabled: Boolean(account.data?.is_admin && selected?.person.id), retry: false })
   const calendar = useQuery({ queryKey: ['admin', 'calendar', from, to], queryFn: () => adminApi.getCalendar(from, to), enabled: Boolean(account.data?.is_admin && from && to && to >= from), retry: false })
   const importPerson = useMutation({ mutationFn: (person: AdminPersonResult) => adminApi.importPerson(person.tmdb_id), onSuccess: (data) => { setSelected(data); setChallenge(null); setNotice(`${data.person.name} imported with ${data.qualified_projects} qualifying credits.`) } })
-  const createChallenge = useMutation({ mutationFn: () => adminApi.createChallenge(selected!.person.id!), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice('Draft challenge created.') } })
-  const schedule = useMutation({ mutationFn: () => adminApi.scheduleChallenge(challenge!.id, scheduleDate), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice(`Challenge scheduled for ${scheduleDate}.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }) } })
+  const createChallenge = useMutation({ mutationFn: () => adminApi.createChallenge(selected!.person.id!), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice('Draft challenge created.'); void queryClient.invalidateQueries({ queryKey: ['admin', 'challenges'] }) } })
+  const schedule = useMutation({ mutationFn: () => adminApi.scheduleChallenge(challenge!.id, scheduleDate), onSuccess: ({ challenge: next }) => { setChallenge(next); setNotice(`Challenge scheduled for ${scheduleDate}.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'challenges'] }) } })
   const preview = useMutation({ mutationFn: () => adminApi.previewChallenge(challenge!.id) })
-  const publish = useMutation({ mutationFn: () => adminApi.publishChallenge(challenge!.id), onSuccess: ({ challenge: next, snapshot_projects: count }) => { setChallenge(next); setNotice(`Challenge published with ${count} project pairs.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }) } })
+  const publish = useMutation({ mutationFn: () => adminApi.publishChallenge(challenge!.id), onSuccess: ({ challenge: next, snapshot_projects: count }) => { setChallenge(next); setNotice(`Challenge published with ${count} project pairs.`); void queryClient.invalidateQueries({ queryKey: ['admin', 'calendar'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'challenges'] }) } })
 
   function searchPeople(event: FormEvent) { event.preventDefault(); setSearchTerm(searchInput.trim()) }
-  function chooseCached(person: AdminPersonResult) { setSelected({ person: { ...person, source: 'tmdb' }, qualified_projects: 0 }); setChallenge(null); setNotice(`${person.name} is already in the local catalogue.`) }
+  function chooseChallenge(next: AdminChallenge) { createChallenge.reset(); setSelected({ person: { ...next.featured_person, source: 'tmdb' }, qualified_projects: 0 }); setChallenge(next); if (next.scheduled_date) setScheduleDate(next.scheduled_date); setNotice(`${next.featured_person.name} challenge opened.`) }
+  function chooseCached(person: AdminPersonResult) { const existing = challenges.data?.challenges.find((item) => item.featured_person.id === person.id); if (existing) { chooseChallenge(existing); return } setSelected({ person: { ...person, source: 'tmdb' }, qualified_projects: 0 }); setChallenge(null); setNotice(`${person.name} is already in the local catalogue.`) }
 
   if (account.isPending) return <section className="utility-page admin-page"><p role="status">Checking access…</p></section>
   if (!account.data?.is_admin) return <section className="utility-page admin-page"><p className="eyebrow">Restricted</p><h1>Access denied</h1><p className="lede">You need an administrator account to open challenge control.</p><Link className="text-action" to="/account">Log in</Link></section>
@@ -56,6 +58,7 @@ export function AdminPage() {
       </section>
       <section className="admin-panel" aria-labelledby="inspect-heading">
         <p className="step-label">Step 2</p><h2 id="inspect-heading">Inspect collaborations</h2>
+        <p className="source-note cache-explanation">Estimated from TMDB credits currently imported into the local catalogue. Final game answers apply the full eligibility rules.</p>
         {!selected && <p className="admin-empty">Select or import a person to see their strongest collaborators.</p>}
         {selected && <div className="selected-person"><strong>{selected.person.name}</strong><span>{selected.qualified_projects ? `${selected.qualified_projects} qualifying credits imported` : 'Local catalogue record'}</span></div>}
         {collaborators.isFetching && <p className="admin-status" role="status">Calculating shared projects…</p>}{collaborators.error && <p className="admin-alert error" role="alert">{message(collaborators.error)}</p>}
@@ -64,6 +67,7 @@ export function AdminPage() {
       </section>
       <section className="admin-panel admin-workflow" aria-labelledby="prepare-heading">
         <p className="step-label">Step 3</p><h2 id="prepare-heading">Prepare challenge</h2>
+        {!challenge && (challenges.data?.challenges.filter((item) => item.status !== 'published').length ?? 0) > 0 && <div className="existing-challenges"><strong>Open an existing challenge</strong>{challenges.data!.challenges.filter((item) => item.status !== 'published').map((item) => <button className="secondary-button" key={item.id} onClick={() => chooseChallenge(item)}>{item.featured_person.name} · {item.status}{item.scheduled_date ? ` · ${item.scheduled_date}` : ''}</button>)}</div>}
         {!selected && <p className="admin-empty">Choose a featured person first.</p>}
         {selected && !challenge && <button className="panel-action" disabled={createChallenge.isPending || !selected.person.id} onClick={() => createChallenge.mutate()}>{createChallenge.isPending ? 'Creating…' : 'Create draft challenge'}</button>}
         {challenge && <><div className="challenge-state"><span>Status</span><strong>{challenge.status}</strong></div><label htmlFor="schedule-date">UTC challenge date</label>
@@ -76,7 +80,7 @@ export function AdminPage() {
       <div className="calendar-heading"><div><p className="step-label">Schedule overview</p><h2 id="calendar-heading">Challenge calendar</h2></div><div className="date-range"><label>From<input aria-label="Calendar from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label><label>To<input aria-label="Calendar to" type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label></div></div>
       {to < from && <p className="admin-alert error" role="alert">The end date must be on or after the start date.</p>}{calendar.isFetching && <p className="admin-status" role="status">Loading challenges…</p>}
       {calendar.error && <p className="admin-alert error" role="alert">{calendar.error instanceof ApiError && calendar.error.status === 403 ? 'Your account no longer has administrator access.' : message(calendar.error)}</p>}
-      <div className="calendar-grid">{calendar.data?.days.map((day) => <article key={day.date} className={day.challenge ? `calendar-day ${day.challenge.status}` : 'calendar-day gap'}><time dateTime={day.date}>{new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' })}</time>{day.challenge ? <><strong>{day.challenge.featured_person.name}</strong><span>{day.challenge.status}</span></> : <><strong>Open date</strong><span>Needs challenge</span></>}</article>)}</div>
+      <div className="calendar-grid">{calendar.data?.days.map((day) => day.challenge ? <button type="button" key={day.date} className={`calendar-day ${day.challenge.status}`} onClick={() => chooseChallenge(day.challenge!)}><time dateTime={day.date}>{new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' })}</time><strong>{day.challenge.featured_person.name}</strong><span>{day.challenge.status}</span></button> : <article key={day.date} className="calendar-day gap"><time dateTime={day.date}>{new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' })}</time><strong>Open date</strong><span>Needs challenge</span></article>)}</div>
     </section>
   </section>
 }

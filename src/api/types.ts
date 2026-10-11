@@ -37,6 +37,7 @@ export interface AdminCollaboratorsResponse { person: AdminPersonResult; collabo
 export type AdminChallengeStatus = 'draft' | 'scheduled' | 'published' | 'cancelled'
 export interface AdminChallenge { id: string; status: AdminChallengeStatus; scheduled_date: string | null; featured_person: AdminPersonResult; rules_version: number }
 export interface AdminChallengeResponse { challenge: AdminChallenge }
+export interface AdminChallengesResponse { challenges: AdminChallenge[] }
 export interface AdminPreview { collaborator_count: number; project_pairs: number; counts: Record<string, number> }
 export interface AdminPublishResponse extends AdminChallengeResponse { snapshot_projects: number }
 export interface AdminCalendarDay { date: string; challenge: AdminChallenge | null }

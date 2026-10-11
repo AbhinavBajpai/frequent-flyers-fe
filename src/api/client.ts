@@ -1,4 +1,4 @@
-import type { AccountUser, AdminCalendarResponse, AdminChallengeResponse, AdminCollaboratorsResponse, AdminImportResponse, AdminPeopleSearchResponse, AdminPersonResult, AdminPreview, AdminPublishResponse, ApiErrorPayload, ArchiveResponse, AuthResponse, CollaboratorResponse, DailyResponse, FriendInviteResponse, FriendResultsResponse, FriendsResponse, PersonSummary, PlayResponse, ProjectGuessResponse, ProjectSummary, SearchPeopleResponse, SearchProjectsResponse } from './types'
+import type { AccountUser, AdminCalendarResponse, AdminChallengeResponse, AdminChallengesResponse, AdminCollaboratorsResponse, AdminImportResponse, AdminPeopleSearchResponse, AdminPersonResult, AdminPreview, AdminPublishResponse, ApiErrorPayload, ArchiveResponse, AuthResponse, CollaboratorResponse, DailyResponse, FriendInviteResponse, FriendResultsResponse, FriendsResponse, PersonSummary, PlayResponse, ProjectGuessResponse, ProjectSummary, SearchPeopleResponse, SearchProjectsResponse } from './types'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
@@ -74,6 +74,7 @@ export const friendsApi = {
 
 
 export const adminApi = {
+  getChallenges: () => apiRequest<AdminChallengesResponse>('/v1/admin/challenges', { credentials: 'include' }),
   searchPeople: async (query: string): Promise<AdminPeopleSearchResponse> => {
     const response = await apiRequest<{ source: 'cache' | 'tmdb'; results: Array<Omit<AdminPersonResult, 'id' | 'tmdb_id'> & { id: number; tmdb_id?: number }> }>(`/v1/admin/people/search?q=${encodeURIComponent(query)}&limit=10`, { credentials: 'include' })
     if (response.source === 'cache') return response as unknown as AdminPeopleSearchResponse
