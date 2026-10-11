@@ -30,15 +30,7 @@ a { color: inherit; }
 .site-header nav a.active { border-color: var(--navy); background: var(--yellow); box-shadow: 3px 3px 0 var(--navy); }
 main { flex: 1; }
 
-.game-page { min-height: calc(100vh - 132px); padding: clamp(54px, 7vw, 96px) clamp(22px, 7vw, 110px) 55px; position: relative; background: var(--blue); isolation: isolate; }
-.game-page::before { content: ''; position: absolute; inset: 0; z-index: -3; opacity: .18; background-image: radial-gradient(var(--navy) .8px, transparent .8px), radial-gradient(circle, transparent 0 42px, var(--navy) 43px 45px, transparent 46px); background-position: 0 0, 68px 82px; background-size: 6px 6px, 310px 310px; }
-.game-page::after { content: ''; position: absolute; width: 125%; height: 108px; left: -12%; top: 38%; z-index: -2; border-top: 3px solid var(--navy); border-bottom: 3px solid var(--navy); opacity: .16; background-image: repeating-linear-gradient(90deg, var(--navy) 0 17px, transparent 17px 31px), repeating-linear-gradient(90deg, transparent 0 112px, var(--navy) 112px 115px), repeating-linear-gradient(90deg, var(--navy) 0 17px, transparent 17px 31px); background-position: 0 8px, 0 50%, 0 calc(100% - 8px); background-size: 100% 9px, 100% 72px, 100% 9px; background-repeat: no-repeat; transform: rotate(-7deg); }
-.cloud { position: absolute; z-index: -1; width: 145px; aspect-ratio: 1; border: var(--border); border-radius: 50%; background: radial-gradient(circle, var(--orange) 0 9px, var(--paper) 10px 20px, var(--navy) 21px 23px, var(--paper) 24px); }
-.cloud::before, .cloud::after { content: ''; position: absolute; width: 28px; height: 28px; border-radius: 50%; background: var(--navy); }
-.cloud::before { left: 28px; top: 34px; }
-.cloud::after { right: 28px; bottom: 34px; }
-.cloud-one { left: -60px; top: 28%; transform: rotate(-8deg); }
-.cloud-two { right: 8%; top: 43%; transform: scale(.72) rotate(9deg); }
+.game-page { min-height: calc(100vh - 132px); padding: clamp(54px, 7vw, 96px) clamp(22px, 7vw, 110px) 55px; position: relative; background-color: var(--blue); background-image: url('/background.png'); background-repeat: repeat; isolation: isolate; }
 .game-intro { position: relative; max-width: 800px; margin: 0 auto 42px; text-align: center; }
 .eyebrow, .card-kicker { margin: 0 0 14px; text-transform: uppercase; font-weight: 800; font-size: .72rem; letter-spacing: .2em; }
 h1, h2 { font-family: 'League Spartan', sans-serif; color: var(--ink); }
@@ -195,7 +187,6 @@ small { display: block; margin-top: 8px; opacity: .67; }
   .score-stamp { margin: 15px 0; position: static; }
   .input-row { display: grid; gap: 8px; }
   button { height: 48px; margin: 0; }
-  .cloud-two { display: none; }
   .site-footer { justify-content: center; text-align: center; }
   .site-footer span:last-child { display: none; }
   .admin-heading, .calendar-heading { display: block; }
