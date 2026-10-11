@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApiError, gameApi } from '../api/client'
 import type { CollaboratorResponse, PersonSummary, PlayResponse, ProjectGuess, ProjectSummary } from '../api/types'
 import { FlightPath } from '../components/FlightPath'
@@ -44,6 +44,17 @@ export function DailyGamePage() {
   const guess = useMutation({ mutationFn: (choice: ProjectSummary) => gameApi.submitProject(playId!, choice, requestKey()), onSuccess: (data) => { cache.setQueryData<PlayResponse>(['play', playId], (current) => ({ ...current, play: data.play, guesses: [...(current?.guesses ?? []), data.guess] })); setProject(null) } })
   const retryResolution = useMutation({ mutationFn: () => gameApi.retryResolution(playId!), onSuccess: (data) => cache.setQueryData(['play', playId], data) })
   const finish = useMutation({ mutationFn: () => gameApi.finish(playId!, requestKey()), onSuccess: (data) => cache.setQueryData(['play', playId], data) })
+
+  // A process restart can leave a background lookup marked pending. After the
+  // server's stale threshold, ask it to safely restart that same cached pair.
+  useEffect(() => {
+    if (!playId || play?.resolution_status !== 'pending') return
+    const timer = window.setTimeout(() => retryResolution.mutate(), 65_000)
+    return () => window.clearTimeout(timer)
+    // The mutation object is intentionally excluded: its identity changes as
+    // request state changes and would reset this recovery timer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playId, play?.resolution_status])
 
   if (daily.isPending) return <Status title="Preparing today’s challenge" message="Loading today’s challenge…" />
   if (daily.isError) {
